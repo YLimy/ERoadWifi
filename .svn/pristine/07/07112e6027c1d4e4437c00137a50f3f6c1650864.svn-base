@@ -1,0 +1,82 @@
+package com.e_road.ui;
+
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+
+import com.e_road.ui.fragment.AdsFragment;
+import com.e_road.ui.fragment.ContentViewPagerFragment;
+import com.e_road.ui.fragment.FragmentCallBack;
+import com.e_road.ui.fragment.WifiFragment;
+import com.e_road.utils.IConstant;
+
+/**
+ * 主界面
+ * @author CaiMeng
+ *
+ */
+public class MainFragmentActivity extends BaseFragmentActivity implements FragmentCallBack{
+	/** FragmentManager */
+	private FragmentManager fm;
+	private int layoutID;
+
+	@Override
+	protected void showViews(FragmentManager fragmentManager, int layoutID) {
+		this.fm = fragmentManager;
+		this.layoutID = layoutID;
+		Bundle bundle = getIntent().getExtras();
+		if (null != bundle) {
+			String showWhat = bundle.getString(IConstant.CONTENT_SHOW);
+			if ("home".equals(showWhat)) {
+				gotoHome(bundle);
+			} else if ("ads".equals(showWhat)) {
+				gotoAds(bundle);
+			} else if ("wifi".equals(showWhat)) {
+				gotoWifi(bundle);
+			} else {
+				gotoHome(bundle);
+			}
+		} else {
+			gotoHome(bundle);
+		}
+	}
+	
+	/**
+	 * 显示WiFi页
+	 */
+	private void gotoWifi(Bundle bundle) {
+		WifiFragment wifiFragment = new WifiFragment();
+		wifiFragment.setArguments(bundle);
+		fm.beginTransaction().replace(layoutID, wifiFragment).commit();
+		// wifiToHome();
+	}
+
+	/**
+	 * 显示主页
+	 */
+	public void gotoHome(Bundle bundle) {
+		ContentViewPagerFragment viewPagerFragment = new ContentViewPagerFragment();
+		viewPagerFragment.setArguments(bundle);
+		fm.beginTransaction().replace(layoutID, viewPagerFragment)
+				.commit();
+	}
+
+	/**
+	 * 显示广告
+	 */
+	private void gotoAds(Bundle bundle) {
+		AdsFragment adsFragment = new AdsFragment();
+		adsFragment.setArguments(bundle);
+		// fm.beginTransaction().show(adsFragment).commit();
+		fm.beginTransaction().replace(layoutID, adsFragment).commit();
+	}
+
+	/**
+	 * WiFi跳转到Home
+	 */
+	@Override
+	public void wifiToHome(Bundle bundle) {
+		gotoHome(bundle);
+	}
+
+	
+}

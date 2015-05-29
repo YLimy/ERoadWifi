@@ -1,0 +1,171 @@
+package com.e_road.ui;
+
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.telephony.TelephonyManager;
+import android.view.View;
+import android.widget.Button;
+
+import com.e_road.R;
+
+public class Class1Activity extends BaseActivity {
+	/** 手机mac地址 */
+	private Button bt_mac;
+	/** 手机IMEI */
+	private Button bt_imei;
+	/** 操作系统版本号 */
+	private Button bt_version;
+	/** 手机号码 */
+	private Button bt_number;
+	/** 手机型号 */
+	private Button bt_model;
+
+	/** 弹框 */
+	private AlertDialog.Builder builder;
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.bt_class1_mac:
+			String result_mac = getPhoneMAC();
+			if (null == result_mac)
+				result_mac = "未获取到wifi设备信息";
+			showAlertDialog("MAC地址为：", result_mac);
+			break;
+		case R.id.bt_class1_version:
+			showAlertDialog("操作系统版本号为：", "Android API:"+getPhoneVersion());
+			break;
+		case R.id.bt_class1_imei:
+			String result_imei = getPhoneIMEI();
+			if(null == result_imei)
+				result_imei = "该设备没有IMEI号码";
+			showAlertDialog("IMEI号码为：", result_imei);
+			break;
+		case R.id.bt_class1_phone_number:
+			String result_number = getPhoneNumber();
+			if(null == result_number)
+				result_number = "未插入SIM卡";
+			showAlertDialog("本机手机号为：", result_number);
+			break;
+		case R.id.bt_class1_phone_model:
+			showAlertDialog("该手机型号为", getPhoneModel());
+			break;
+		default:
+			break;
+		}
+	}
+
+	/**
+	 * 显示弹框
+	 * 
+	 * @param title
+	 * @param msg
+	 */
+	private void showAlertDialog(String title, String msg) {
+		builder = new AlertDialog.Builder(this);
+		builder.setTitle(title);
+		builder.setMessage(msg);
+		builder.setPositiveButton("确定", new OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		builder.setNegativeButton("取消", new OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		builder.show();
+	}
+
+	@Override
+	public void loadView() {
+		setContentView(R.layout.class1);
+//		selectedButtomTab(IConstant.BUTTOM_2);
+	}
+
+	@Override
+	public void findViews() {
+		bt_mac = (Button) findViewById(R.id.bt_class1_mac);
+		bt_imei = (Button) findViewById(R.id.bt_class1_imei);
+		bt_version = (Button) findViewById(R.id.bt_class1_version);
+		bt_number = (Button) findViewById(R.id.bt_class1_phone_number);
+		bt_model = (Button) findViewById(R.id.bt_class1_phone_model);
+	}
+
+	private String getPhoneVersion() {
+		return android.os.Build.VERSION.SDK_INT + "";
+	}
+	/**
+	 * 获取手机型号
+	 */
+	private String getPhoneModel() {
+		return android.os.Build.MODEL;
+	}
+
+	/**
+	 * 获取手机号码
+	 */
+	private String getPhoneNumber() {
+		TelephonyManager telephoneManager = 
+				(TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		return telephoneManager.getLine1Number();
+	}
+
+	/**
+	 * 获取手机IMEI
+	 */
+	private String getPhoneIMEI() {
+		/*
+		 * IMEI(International Mobile EquipmentIdentity) 是国际移动设备身份码的缩写，国际移动装备辨识码，
+		 * 是由15位数字组成的 "电子串号"，它与每台手机一一对应，而且该码是全世界唯一的。
+		 * 每一只手机在组装完成后都将被赋予一个全球唯一的一组号码， 这个号码从生产到交付使用都将被制造生产的厂商所记录。
+		 */
+		TelephonyManager telephoneManager = 
+				(TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		return telephoneManager.getDeviceId();
+	}
+
+	/**
+	 * 获取mac地址
+	 * 
+	 * @return [mac地址]：wifi连接正常时<br>
+	 *         [nill]：没有wifi设备时(比如模拟器)
+	 */
+	private String getPhoneMAC() {
+		WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+		WifiInfo wifiInfo = null;
+		if (null != wifiManager)
+			wifiInfo = wifiManager.getConnectionInfo();
+		if (null != wifiInfo)
+			return wifiInfo.getMacAddress();
+		else
+			return null;
+	}
+
+	@Override
+	public void setListener() {
+		bt_mac.setOnClickListener(this);
+		bt_imei.setOnClickListener(this);
+		bt_version.setOnClickListener(this);
+		bt_number.setOnClickListener(this);
+		bt_model.setOnClickListener(this);
+	}
+
+	@Override
+	public void progressLogic() {
+		// TODO Auto-generated method stub
+
+	}
+
+}

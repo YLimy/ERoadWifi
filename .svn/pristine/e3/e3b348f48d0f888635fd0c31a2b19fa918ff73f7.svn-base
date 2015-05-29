@@ -1,0 +1,26 @@
+package com.e_road.ui;
+
+import com.e_road.ui.fragment.LoginFragment;
+
+import android.support.v4.app.FragmentManager;
+
+/**
+ * 登录的activity
+ * @author CaiMeng
+ *
+ */
+public class LoginFragmentActivity extends BaseFragmentActivity {
+
+	@Override
+	protected void showViews(FragmentManager fragmentManager, int layoutID) {
+		fragmentManager.beginTransaction()
+				.replace(layoutID, new LoginFragment()).commit();
+	}
+
+	@Override
+	protected void showAds(FragmentManager fragmentManager, int layoutID) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

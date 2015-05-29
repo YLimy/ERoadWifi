@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="110dp"
+    android:orientation="vertical" >
+    <!-- 此页是home页的app列表的item -->
+
+    <!-- app信息区 -->
+    <RelativeLayout
+        android:id="@+id/rl_home_list_item_app"
+        android:layout_width="wrap_content"
+        android:layout_height="56dp"
+        android:layout_margin="12dp" >
+        
+        <!-- app logo -->
+        <ImageView 
+            android:id="@+id/iv_home_list_item_appimg"
+            android:layout_height="50dp"
+            android:layout_width="50dp"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/ic_launcher"/>
+        
+        <!-- download button -->
+        <Button 
+            android:id="@+id/bt_home_list_item_download"
+            android:layout_height="40dp"
+            android:layout_width="65dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:textColor="@android:color/white"
+            android:text="下载"
+            android:background="#63C400"/>
+        
+        <RelativeLayout
+            android:id="@+id/rl_home_list_item_app_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@+id/iv_home_list_item_appimg"
+            android:layout_toLeftOf="@+id/bt_home_list_item_download">
+            
+            <!-- app name -->
+            <TextView
+                android:id="@+id/tv_home_list_item_app_name"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:textSize="16sp"
+                android:singleLine="true"
+                android:ems="20"
+                android:text="app name"/>
+            
+            <!-- app rating bar -->
+            <RatingBar 
+                android:id="@+id/rb_home_list_item"
+                android:layout_height="16dp"
+                android:layout_width="wrap_content"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="3dp"
+                android:layout_below="@+id/tv_home_list_item_app_name"
+                style="@style/MyRatingBar"
+                android:isIndicator="false"
+                android:numStars="5"
+                android:rating="2.1"/>
+            
+            <!-- app download count and app size -->
+            <LinearLayout 
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_below="@+id/rb_home_list_item"
+                android:orientation="horizontal">
+                
+                <TextView 
+                    android:id="@+id/tv_home_list_item_download_times"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="#B6B6B6"
+                    android:text="下载次数"/>
+                <View 
+                    android:layout_height="match_parent"
+                    android:layout_width="1dp"
+                    android:layout_marginLeft="2dp"
+                    android:layout_marginRight="2dp"
+                    android:background="#B6B6B6"/>
+                <TextView 
+                    android:id="@+id/tv_home_list_item_apk_size"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="#B6B6B6"
+                    android:text="文件大小"/>
+            </LinearLayout>
+            
+        </RelativeLayout>
+        
+        
+        
+    </RelativeLayout>
+    
+    <!-- app描述区 -->
+    <TextView 
+        android:id="@+id/tv_home_list_item"
+       	android:layout_height="30dp"
+       	android:layout_width="match_parent"
+       	android:layout_below="@+id/rl_home_list_item_app"
+       	android:textSize="14sp"
+       	android:paddingLeft="15dp"
+       	android:paddingRight="15dp"
+       	android:gravity="center_vertical"
+       	android:singleLine="true"
+       	android:textColor="#B6B6B6"
+       	android:background="#F9F9F9"
+       	android:text="app描述区"/>
+
+</RelativeLayout>

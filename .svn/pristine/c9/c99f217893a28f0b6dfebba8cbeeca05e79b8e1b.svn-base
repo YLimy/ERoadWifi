@@ -1,0 +1,124 @@
+package com.e_road.ui;
+
+import java.util.HashMap;
+
+import android.content.Context;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.e_road.R;
+import com.e_road.utils.CommonUtil;
+import com.e_road.utils.IConstant;
+import com.e_road.utils.LoggerUtil;
+import com.e_road.utils.parser.Class2Parser;
+import com.e_road.vo.RequestVo;
+import com.e_road.vo.UserInfo;
+
+public class Class2Activity extends BaseActivity {
+	private static String TAG = "Class2Activity";
+	private TextView tv_text;
+	private Button button;
+
+	// private ERoadService mService;
+	// private ServiceConnection mConnection = new ServiceConnection() {
+	//
+	// @Override
+	// public void onServiceDisconnected(ComponentName name) {
+	// mService = null;
+	// LoggerUtil.d(TAG, "service解绑了");
+	// }
+	//
+	// @Override
+	// public void onServiceConnected(ComponentName name, IBinder service) {
+	// LoggerUtil.d(TAG, "service绑定了");
+	// mService = ((ERoadService.ERoadBinder) service).getService();
+	// }
+	// };
+
+	// private ProtectedService pService;
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.bt_class2:
+			HashMap<String, String> map = new HashMap<String, String>();
+			Class2Parser parser = new Class2Parser();
+			RequestVo requestVo = new RequestVo(R.string.url_userinfo, this,
+					map, parser);
+
+			getDataFromServer(requestVo, new DataCallBack<UserInfo>() {
+
+				@Override
+				public void progressData(UserInfo param) {
+					button.setVisibility(View.GONE);
+					String nickName = param.getNickname();
+					showNickName(nickName);
+				}
+			});
+			break;
+		}
+	}
+
+	@Override
+	public void loadView() {
+
+		setContentView(R.layout.class2);
+		// selectedButtomTab(IConstant.BUTTOM_3);
+
+		// Intent intent = new Intent(Class2Activity.this, ERoadService.class);
+		// bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+		//
+		// startService(new Intent(this, ProtectedService.class));
+	}
+
+	@Override
+	public void findViews() {
+		tv_text = (TextView) findViewById(R.id.tv_class2_text);
+		button = (Button) findViewById(R.id.bt_class2);
+	}
+
+	@Override
+	public void setListener() {
+		button.setOnClickListener(this);
+	}
+
+	// TODO [测试] 这个方法要提前，在setContentView(R.layout.class2)前
+	@Override
+	public void progressLogic() {
+		// isLogin();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		if (CommonUtil.isLogin(this)) {
+			//如果已登录，则隐藏登陆按钮，并显示昵称
+			button.setVisibility(View.GONE);
+			showNickName(this.getSharedPreferences("sp",
+					Context.MODE_PRIVATE).getString(IConstant.LOGIN_USER, ""));
+			
+		}else{
+			tv_text.setText("当前用户未登陆");
+			button.setVisibility(View.VISIBLE);
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		tv_text = null;
+		// unbindService(mConnection);
+		// mService = null;
+		super.onDestroy();
+	}
+
+	/**
+	 * 显示已登陆用户昵称
+	 * 
+	 * @param nickName
+	 */
+	private void showNickName(String nickName) {
+		tv_text.setText("欢迎  ：" + nickName);
+	}
+}

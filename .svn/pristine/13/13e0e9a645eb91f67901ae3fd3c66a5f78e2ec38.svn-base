@@ -1,0 +1,57 @@
+package com.e_road.ui;
+
+import java.util.HashMap;
+
+import android.view.View;
+import android.widget.TextView;
+
+import com.e_road.R;
+import com.e_road.utils.IConstant;
+import com.e_road.utils.parser.Class2Parser;
+import com.e_road.vo.RequestVo;
+import com.e_road.vo.UserInfo;
+
+public class Class2Activity extends BaseActivity {
+	private TextView tv_text;
+			
+	@Override
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void loadView() {
+		setContentView(R.layout.class2);
+		selectedButtomTab(IConstant.BUTTOM_3);
+	}
+
+	@Override
+	public void findViews() {
+		tv_text = (TextView) findViewById(R.id.tv_class2_text);
+	}
+
+	@Override
+	public void setListener() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void progressLogic() {
+		int requestUrl = R.string.url_userinfo;
+		HashMap<String, String> map = new HashMap<>();
+		Class2Parser parser = new Class2Parser();
+		RequestVo requestVo = new RequestVo(requestUrl, this, map, parser);
+		
+		getDataFromServer(requestVo, new DataCallBack<UserInfo>() {
+
+			@Override
+			public void progressData(UserInfo param) {
+				String user = param.getUsername();
+				tv_text.setText("欢迎回来："+user);
+			}
+		});
+	}
+
+}

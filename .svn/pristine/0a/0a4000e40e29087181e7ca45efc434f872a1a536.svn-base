@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:layout_marginTop="10dp">
+    
+    <LinearLayout 
+        android:id="@+id/ll_login_nick"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal"
+	    android:visibility="gone">
+	    <TextView 
+	        android:layout_height="wrap_content"
+	        android:layout_width="0dp"
+	        android:layout_weight="1"
+	        android:text="昵称:"/>
+	    <EditText 
+	        android:id="@+id/et_login_nickname"
+	        android:layout_height="wrap_content"
+	        android:layout_width="0dp"
+	        android:layout_weight="2"
+	        android:inputType="text"/>
+	</LinearLayout>
+    
+	<LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal">
+	    <TextView 
+	        android:layout_height="wrap_content"
+	        android:layout_width="0dp"
+	        android:layout_weight="1"
+	        android:text="用户名:"/>
+	    <EditText 
+	        android:id="@+id/et_login_username"
+	        android:layout_height="wrap_content"
+	        android:layout_width="0dp"
+	        android:layout_weight="2"
+	        android:hint="请以手机号为用户名"
+	        android:inputType="text"/>
+	</LinearLayout>
+	
+	<LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal">
+	    <TextView 
+	        android:layout_height="wrap_content"
+	        android:layout_width="0dp"
+	        android:layout_weight="1"
+	        android:text="密码:"/>
+	    <EditText 
+	        android:id="@+id/et_login_password"
+	        android:layout_height="wrap_content"
+	        android:layout_width="0dp"
+	        android:layout_weight="2"
+	        android:inputType="textPassword"/>
+	</LinearLayout>
+	
+	<TextView android:id="@+id/tv_login_msg"
+	    android:layout_height="wrap_content"
+	    android:layout_width="match_parent"
+	    android:text="message"
+	    android:layout_marginTop="5dp"
+	    android:gravity="center_horizontal"
+	    android:visibility="gone"/>"
+	
+	<LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal"
+	    android:layout_marginTop="20dp">
+	    <Button 
+	        android:id="@+id/bt_login_login"
+	        android:layout_height="wrap_content"
+	        android:layout_width="0dp"
+	        android:layout_weight="1"
+	        android:layout_marginLeft="20dp"
+	        android:layout_marginRight="20dp"
+	        android:text="登录"/>
+	    <Button 
+	        android:id="@+id/bt_login_regist"
+	        android:layout_height="wrap_content"
+	        android:layout_width="0dp"
+	        android:layout_weight="1"
+	        android:layout_marginLeft="20dp"
+	        android:layout_marginRight="20dp"
+	        android:text="注册"/>
+	</LinearLayout>
+	
+</LinearLayout>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.e_road"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="19" />
+    
+    <!-- 联网权限 -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- 获取wifi状态的权限 -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <!-- 读取手机信息的权限 -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <!-- 获取网络状态信息的权限 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!-- 监听开机广播的权限 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/icon_mark"
+        android:label="@string/app_name"
+        android:theme="@style/Default" >
+        <activity
+            android:name=".ui.HomeActivity"
+            android:theme="@style/Default.startTheme"
+            android:launchMode="singleTask"
+            android:label="@string/app_name"
+            android:logo="@drawable/icon_mark">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.Class1Activity"
+            android:launchMode="singleTask"></activity>
+        <activity android:name=".ui.Class2Activity"
+            android:launchMode="singleTask"></activity>
+        <activity android:name=".ui.SearchActivity"
+            android:launchMode="singleTask"></activity>
+        <activity android:name=".ui.MoreActivity"
+            android:launchMode="singleTask"></activity>
+        <activity android:name=".ui.LoginActivty"></activity>
+        
+        
+        <service android:name=".service.ERoadService"></service>
+        <service android:name=".service.ProtectedService"></service>
+        
+        <!-- 接收开机广播并自启动 -->
+        <receiver android:name="com.e_road.service.BootBroadCastReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+        
+    </application>
+
+</manifest>

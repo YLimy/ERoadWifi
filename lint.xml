@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="DefaultLocale">
+        <ignore path="src/com/e_road/utils/DownLoadApkFileInfo.java" />
+        <ignore path="src/com/e_road/utils/FileTypeUtil.java" />
+    </issue>
+</lint>

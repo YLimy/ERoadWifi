@@ -1,0 +1,235 @@
+package com.e_road.ui.fragment;
+
+import java.util.Iterator;
+import java.util.List;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.app.Fragment;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import com.e_road.R;
+import com.e_road.adapter.WifiAdapter;
+import com.e_road.utils.IConstant;
+import com.e_road.utils.LoggerUtil;
+import com.e_road.utils.WifiUtil;
+import com.e_road.utils.WifiUtil.WifiCipherType;
+
+/**
+ * WiFi标签显示的内容
+ * 
+ * @author CaiMeng
+ * 
+ */
+public class WifiFragment extends Fragment {
+	
+	private static final String TAG = "WifiFragment";
+	/** WiFi列表 */
+	private ListView listView;
+	private WifiUtil wifiUtil;
+	/** 扫描WiFi结果列表 */
+	private List<ScanResult> scanResults;
+	
+	private FragmentCallBack callBack = null;
+	/** 倒计时对话框 */
+	private AlertDialog alertDialog;
+	
+	@SuppressLint("HandlerLeak")
+	private Handler handler = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			// 倒计时提示框
+			case 0:
+				if (null != alertDialog) {
+					int i = msg.getData().getInt("countdown");
+					alertDialog.setMessage(i + "秒后跳转到首页");
+				}
+				break;
+			case 1:
+				dismissDialog();
+				LoggerUtil.d(TAG, "wifi跳转到home");
+				callBack.wifiToHome(new Bundle());
+				break;
+			}
+		}
+
+	};
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.wifi_fragment, container, false);
+//		test();
+		findView(view);
+		init();
+		setListener();
+		if (!isConnected()) {
+			LoggerUtil.d("WifiFragment", "没有连接到9797168，重新连接");
+			autoConnect();
+		}
+		if(isJump()){
+			countDown();
+		}
+		return view;
+	}
+
+	/**
+	 * 是否已经连接到9797168.com
+	 * 
+	 * @return
+	 */
+	private boolean isConnected() {
+		return IConstant.SSID.equals(wifiUtil.getSSID()) ? true : false;
+	}
+
+	/**
+	 * 自动连接9797168.com
+	 */
+	@SuppressLint("ShowToast")
+	private void autoConnect() {
+		Iterator<ScanResult> iterator = scanResults.iterator();
+		String ssid = "";
+		while (iterator.hasNext()) {
+			ssid = iterator.next().SSID;
+			// SSID有效，并与默认连接WiFi相符
+			if (!TextUtils.isEmpty(ssid) && IConstant.SSID.equals(ssid)) {
+//				wifiUtil.disconnectAllWifi();
+				WifiConfiguration config = wifiUtil.CreateWifiInfo(ssid, null,
+						WifiCipherType.NOPASS);
+				if (wifiUtil.addNetwork(config)) {
+					Toast.makeText(getActivity(), "连接到9797168.com成功",
+							Toast.LENGTH_SHORT);
+				}
+				return;
+			}
+		}
+	}
+
+	/**
+	 * test
+	 */
+	public void test() {
+		WifiUtil wifiUtil = new WifiUtil(getActivity());
+		wifiUtil.startScan();
+		String wifis = wifiUtil.lookUpScan().toString();
+		LoggerUtil.d("WifiFragment", wifis);
+	}
+
+	/**
+	 * 查找控件
+	 */
+	private void findView(View view) {
+		listView = (ListView) view.findViewById(R.id.lv_wifi_fragment);
+	}
+
+	/**
+	 * 初始化控件<br>
+	 * 刷新可用网络列表
+	 */
+	private void init() {
+		wifiUtil = new WifiUtil(getActivity());
+		refreshWifiList();
+		listView.setAdapter(new WifiAdapter(getActivity(), scanResults));
+	}
+
+	/**
+	 * 刷新WiFi列表
+	 */
+	private void refreshWifiList() {
+		scanResults = wifiUtil.startScan();
+	}
+
+	private void setListener() {
+		// TODO
+	}
+
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		callBack = (FragmentCallBack) activity;
+	}
+	
+	/**
+	 * 是否要从WiFi跳转到首页
+	 * @return
+	 */
+	private boolean isJump(){
+		Bundle bundle = getArguments();
+		if(null != bundle){
+			return bundle.getBoolean("isJump");
+		}
+		return false;
+	}
+	
+	/**
+	 * 跳转倒计时
+	 */
+	private void countDown(){
+		showAlertDialog();
+
+		Thread thread = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				int i = 5;
+				while (i > -1) {
+					Message msg = Message.obtain();
+					Bundle bundle = new Bundle();
+					msg.what = 0;
+					bundle.putInt("countdown", i);
+					msg.setData(bundle);
+					handler.sendMessage(msg);
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					i--;
+				}
+				handler.sendEmptyMessage(1);
+			}
+		});
+		thread.start();
+	}
+	
+	/**
+	 * 显示跳转倒计时提示框
+	 */
+	private void showAlertDialog() {
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		builder.setMessage("5秒后跳转到首页");
+		alertDialog = builder.create();
+		alertDialog.show();
+	}
+	private void dismissDialog(){
+		if(null != alertDialog){
+			alertDialog.dismiss();
+		}
+	}
+
+	@Override
+	public void onDestroy() {
+		listView = null;
+		wifiUtil = null;
+		scanResults = null;
+		callBack = null;
+		dismissDialog();
+		alertDialog = null;
+		super.onDestroy();
+	}
+	
+}

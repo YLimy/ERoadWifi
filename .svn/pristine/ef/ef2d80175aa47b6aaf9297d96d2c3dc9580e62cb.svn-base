@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">E路网</string>
+    <string name="ok">确定</string>
+    <string name="cancle">取消</string>
+    
+    <!-- custom -->
+    <string name="custom_title_back">登录</string>
+
+    <!-- menu start -->
+    <string name="menu_main_search">搜索</string>
+    <string name="menu_main_add">添加</string>
+    <string name="menu_main_regist">注册</string>
+    <string name="menu_main_login">登录</string>
+    <string name="menu_main_logout">注销</string>
+    <string name="menu_main_settings">设置</string>
+    <string name="menu_main_exit">退出</string>
+    <string name="menu_add_favorite">收藏</string>
+    <string name="menu_add_bookmarks">书签</string>
+    <string name="menu_add_wifihot">热点</string>
+    <!-- menu end -->
+    
+    <!-- menu buttom start -->
+    <string name="menu_buttom_home">首页</string>
+    <string name="menu_buttom_service">服务</string>
+    <string name="menu_buttom_wifi">wifi</string>
+    <string name="menu_buttom_apps">应用</string>
+    <string name="menu_buttom_mine">我的</string>
+    <string name="description">line</string>
+    <!-- menu buttom end -->
+    
+    <!-- view item wifi start -->
+    <string name="view_item_wifi_img">wifi</string>
+    <string name="view_item_wifi_ssid">SSID</string>
+    <string name="view_item_wifi_capability">加密方式</string>
+    <!-- view item wifi end -->
+    
+    <!-- welcome activity start -->
+    <string name="welcome_version">1.0</string>
+    <string name="welcome_alert_dialog_title">更新提示</string>
+    <string name="welcome_alert_dialog_msg">亲，有新版本更新哟</string>
+    <string name="welcome_progress_dialog_msg">正在下载</string>
+    <string name="welcome_download_erro">下载失败</string>
+    <!-- welcome activity end -->
+    
+    <!-- account start -->
+    <string name="login_account">用户登录</string>
+    <string name="login_account_nickname">昵称：</string>
+    <string name="login_account_nickname_hint">请输入您的昵称</string>
+    <string name="login_account_name">账号：</string>
+    <string name="login_account_name_hint">请输入您的手机号</string>
+    <string name="login_account_password">密码：</string>
+    <string name="login_account_password_hint">请输入密码</string>
+    <string name="login_account_password_show">显示</string>
+    <string name="login_account_password_forget">忘记密码</string>
+    <string name="login_account_login">快速登录</string>
+    <string name="login_account_regist">立即注册</string>
+    <!-- account end -->
+
+</resources>

@@ -1,0 +1,18 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <title>404ERROR</title>
+    
+<style>
+*{ margin:0;padding:0;}
+.notFound{ background:url(404.png) no-repeat center 120px ;  margin:auto}
+.notFound div{ font-family:Microsoft YaHei,\5b8b\4f53, Arial, Verdana; font-size:14px; color:#000; text-align:center; padding-top:270px}
+.notFound a{ color:#37B6E8; text-decoration:underline;}
+</style>
+</head>
+
+<body >
+<div class="notFound">
+	<div>前方在施工，回到<a href="http://www.9797168.com">首页</a></div>
+</div>
+</body></html>

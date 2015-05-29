@@ -1,0 +1,91 @@
+package com.e_road.ui;
+
+import java.util.HashMap;
+
+import com.e_road.R;
+import com.e_road.utils.IConstant;
+import com.e_road.utils.parser.LoginParser;
+import com.e_road.vo.RequestVo;
+import com.e_road.vo.UserInfo;
+
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+
+public class LoginActivty extends BaseActivity {
+	/** 判断是否其他页面跳转而来 */
+	private boolean isLoginNot =  false;
+	
+	private Button bt_login;
+	private Button bt_regist;
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.bt_login_login:
+			//TODO 验证
+			int requestUrl = R.string.url_login;
+			HashMap<String, String> map = new HashMap<>();
+			map.put("username", "qwer@163.com");
+			map.put("password", "123456");
+			LoginParser parser = new LoginParser();
+			RequestVo requestVo = new RequestVo(requestUrl, this, map, parser);
+			getDataFromServer(requestVo, new DataCallBack<Object>() {
+
+				@Override
+				public void progressData(Object param) {
+					if(param instanceof UserInfo){
+						if(isLoginNot){
+							setResult(IConstant.RESULTCODE_LOGIN_LOGIN_NOT);
+							finish();
+						}else{
+							//TODO to 用户信息
+							Toast.makeText(LoginActivty.this, "跳转到用户界面", Toast.LENGTH_SHORT).show();
+						}
+					}else if((param instanceof String) && param.equals(IConstant.LOGIN_ERRO)){
+						Toast.makeText(LoginActivty.this, "用户名或密码错误", Toast.LENGTH_SHORT).show();
+					}else{
+						Toast.makeText(LoginActivty.this, "服务器异常", Toast.LENGTH_SHORT).show();
+					}
+				}
+			});
+			
+			break;
+		case R.id.bt_login_regist:
+			
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	@Override
+	public void loadView() {
+		setContentView(R.layout.login);
+
+	}
+
+	@Override
+	public void findViews() {
+		bt_login = (Button) findViewById(R.id.bt_login_login);
+		bt_regist = (Button) findViewById(R.id.bt_login_regist);
+	}
+
+	@Override
+	public void setListener() {
+		bt_login.setOnClickListener(this);
+		bt_regist.setOnClickListener(this);
+	}
+
+	@Override
+	public void progressLogic() {
+		if(getIntent().getStringExtra(IConstant.IK_BASE_LOGIN_NOT) != null){
+			isLoginNot = true;
+		}else{
+			isLoginNot = false;
+		}
+
+	}
+
+}

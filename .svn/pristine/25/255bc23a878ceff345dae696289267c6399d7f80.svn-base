@@ -1,0 +1,143 @@
+package com.e_road.ui;
+
+import java.util.HashMap;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.e_road.R;
+import com.e_road.service.ERoadService;
+import com.e_road.service.ProtectedService;
+import com.e_road.utils.CommonUtil;
+import com.e_road.utils.IConstant;
+import com.e_road.utils.LoggerUtil;
+import com.e_road.utils.parser.Class2Parser;
+import com.e_road.vo.RequestVo;
+import com.e_road.vo.UserInfo;
+
+public class Class2Activity extends BaseActivity {
+	private static String TAG = "Class2Activity";
+	private TextView tv_text;
+	private Button button_login;
+	private Button button_logout;
+
+	 private ERoadService mService;
+	 private ServiceConnection mConnection = new ServiceConnection() {
+	
+	 @Override
+	 public void onServiceDisconnected(ComponentName name) {
+	 mService = null;
+	 LoggerUtil.d(TAG, "ERoadService解绑了");
+	 }
+	
+	 @Override
+	 public void onServiceConnected(ComponentName name, IBinder service) {
+	 mService = ((ERoadService.ERoadBinder) service).getService();
+	 LoggerUtil.d(TAG, "ERoadService绑定了");
+	 }
+	 };
+
+	// private ProtectedService pService;
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.bt_class2_login:
+			HashMap<String, String> map = new HashMap<String, String>();
+			Class2Parser parser = new Class2Parser();
+			RequestVo requestVo = new RequestVo(R.string.url_userinfo, this,
+					map, parser);
+
+			getDataFromServer(requestVo, new DataCallBack<UserInfo>() {
+
+				@Override
+				public void progressData(UserInfo param) {
+					button_login.setVisibility(View.GONE);
+					button_logout.setVisibility(View.VISIBLE);
+					String nickName = param.getNickname();
+					showNickName(nickName);
+				}
+			});
+			break;
+		case R.id.bt_class2_logout:
+			
+			LoggerUtil.d("Class2", "------------------");
+			baseLogout();
+			
+			break;
+		}
+	}
+
+	@Override
+	public void loadView() {
+
+		setContentView(R.layout.class2);
+		// selectedButtomTab(IConstant.BUTTOM_3);
+
+		 Intent intent = new Intent(Class2Activity.this, ERoadService.class);
+		 bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+		
+		 startService(new Intent(this, ProtectedService.class));
+	}
+
+	@Override
+	public void findViews() {
+		tv_text = (TextView) findViewById(R.id.tv_class2_text);
+		button_login = (Button) findViewById(R.id.bt_class2_login);
+		button_logout = (Button) findViewById(R.id.bt_class2_logout);
+	}
+
+	@Override
+	public void setListener() {
+		button_login.setOnClickListener(this);
+		button_logout.setOnClickListener(this);
+	}
+
+	// TODO [测试] 这个方法要提前，在setContentView(R.layout.class2)前
+	@Override
+	public void progressLogic() {
+		// isLogin();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		if (CommonUtil.isLogin(this)) {
+			//如果已登录，则隐藏登陆按钮，并显示昵称
+			button_login.setVisibility(View.GONE);
+			button_logout.setVisibility(View.VISIBLE);
+			showNickName(this.getSharedPreferences("sp",
+					Context.MODE_PRIVATE).getString(IConstant.LOGIN_USER_NAME, ""));
+			
+		}else{
+			tv_text.setText("当前用户未登陆");
+			button_logout.setVisibility(View.GONE);
+			button_login.setVisibility(View.VISIBLE);
+			
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		tv_text = null;
+		 unbindService(mConnection);
+		 mService = null;
+		super.onDestroy();
+	}
+
+	/**
+	 * 显示已登陆用户昵称
+	 * 
+	 * @param nickName
+	 */
+	private void showNickName(String nickName) {
+		tv_text.setText("欢迎  ：" + nickName);
+	}
+}

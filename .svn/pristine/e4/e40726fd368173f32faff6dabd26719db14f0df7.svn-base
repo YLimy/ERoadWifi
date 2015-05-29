@@ -1,0 +1,23 @@
+package com.e_road.utils.parser;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.alibaba.fastjson.JSON;
+import com.e_road.vo.UserInfo;
+
+public class Class2Parser extends BaseParser<UserInfo> {
+
+	@Override
+	public UserInfo parseJson(String paramString) throws JSONException {
+		if(null != checkResponse(paramString)){
+			JSONObject jsonObj = new JSONObject(paramString);
+			String jsonStr = jsonObj.optString("userinfo");
+			UserInfo userInfo = JSON.parseObject(jsonStr, UserInfo.class);
+			return userInfo;
+		}
+		
+		return null;
+	}
+
+}

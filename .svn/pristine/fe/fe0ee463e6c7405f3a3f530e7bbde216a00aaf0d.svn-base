@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">E路网</string>
+    <string name="ok">确定</string>
+    <string name="cancle">取消</string>
+    
+    <!-- custom -->
+    <string name="custom_title_back">登录</string>
+    
+    <!-- base fragment start -->
+    <string name="base_frag_ads">这是广告，走马灯</string>
+    <!-- base fragment end -->
+
+    <!-- menu start -->
+    <string name="menu_main_search">搜索</string>
+    <string name="menu_main_add">添加</string>
+    <string name="menu_main_refresh">刷新</string>
+    <string name="menu_main_regist">注册</string>
+    <string name="menu_main_login">登录</string>
+    <string name="menu_main_list">wifi列表</string>
+    <string name="menu_main_logout">注销</string>
+    <string name="menu_main_settings">设置</string>
+    <string name="menu_main_download">下载</string>
+    <string name="menu_main_exit">退出</string>
+    <string name="menu_add_favorite">收藏</string>
+    <string name="menu_add_bookmarks">书签</string>
+    <string name="menu_add_wifihot">热点</string>
+    <!-- menu end -->
+    
+    <!-- menu buttom start -->
+    <string name="menu_buttom_home">首页</string>
+    <string name="menu_buttom_service">服务</string>
+    <string name="menu_buttom_wifi">wifi</string>
+    <string name="menu_buttom_apps">应用</string>
+    <string name="menu_buttom_mine">我的</string>
+    <string name="description">line</string>
+    <!-- menu buttom end -->
+    
+    <!-- view item wifi start -->
+    <string name="view_item_wifi_img">wifi</string>
+    <string name="view_item_wifi_ssid">SSID</string>
+    <string name="view_item_wifi_capability">加密方式</string>
+    <!-- view item wifi end -->
+    
+    <!-- welcome activity start -->
+    <string name="welcome_version">1.0</string>
+    <string name="welcome_alert_dialog_title">更新提示</string>
+    <string name="welcome_alert_dialog_msg">亲，有新版本更新哟</string>
+    <string name="welcome_progress_dialog_msg">正在下载</string>
+    <string name="welcome_download_erro">下载失败</string>
+    <!-- welcome activity end -->
+    
+    <!-- account start -->
+    <string name="account_login">用户登录</string>
+    <string name="account_nickname">昵称：</string>
+    <string name="account_login_nickname_hint">请输入您的昵称&#040;最多15字&#041;</string>
+    <string name="account_username">账号：</string>
+    <string name="account_login_name_hint">请输入您的手机号</string>
+    <string name="account_password">密码：</string>
+    <string name="account_login_password_hint">请输入密码&#040;最多16字&#041;</string>
+    <string name="account_password_show">显示</string>
+    <string name="account_login_password_forget">忘记密码&#040;最多16字&#041;</string>
+    <string name="account_login_login">快速登录</string>
+    <string name="account_login_regist">立即注册</string>
+    <string name="account_modify_title">用户信息修改</string>
+    <string name="account_modify">修改</string>
+    <string name="account_password_hint">如需修改的新密码&#040;最多16字&#041;</string>
+    <string name="account_password_hint_repeat">请再次输入新密码&#040;最多16字&#041;</string>
+    <string name="account_modify_confirm">确认修改</string>
+    <string name="account_modify_goto_login">去登录</string>
+    <!-- account end -->
+    
+    <!-- wifi fragment start -->
+    <string name="wifi_nowifi_img_discription">noWifiImg</string>
+    <string name="wifi_nowifi_information">没有开启wifi</string>
+    <string name="wifi_nowifi_button_open">开启</string>
+    <string name="wifi_nowifi_button_cancle">取消</string>
+    <string name="wifi_nowifi_button_close">关闭</string>
+    <!-- wifi fragment end -->
+
+	<!-- download adapter -->
+	<string name="item_downlaod_icon">icon</string>
+	<string name="item_downlaod_filename">file</string>
+</resources>

@@ -1,0 +1,40 @@
+package com.e_road.ui;
+
+import com.e_road.utils.IConstant;
+import com.e_road.R;
+
+import android.view.View;
+
+public class SearchActivity extends BaseActivity {
+
+	@Override
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void loadView() {
+		setContentView(R.layout.search);
+		selectedButtomTab(IConstant.BUTTOM_4);
+	}
+
+	@Override
+	public void findViews() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setListener() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void progressLogic() {
+		// TODO Auto-generated method stub
+
+	}
+
+}

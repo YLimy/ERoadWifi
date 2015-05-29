@@ -1,0 +1,462 @@
+package com.e_road.ui.fragment;
+
+import java.util.Iterator;
+import java.util.List;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.NetworkInfo;
+import android.net.NetworkInfo.State;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Parcelable;
+import android.support.v4.app.Fragment;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import com.e_road.R;
+import com.e_road.adapter.WifiAdapter;
+import com.e_road.ui.WifiFragmentActivity;
+import com.e_road.utils.IConstant;
+import com.e_road.utils.LoggerUtil;
+import com.e_road.utils.WifiUtil;
+import com.e_road.utils.WifiUtil.WifiCipherType;
+
+/**
+ * WiFi列表的界面
+ * 
+ * @author CaiMeng
+ * 
+ */
+public class WifiListFragment extends Fragment implements OnItemClickListener {
+
+	private static final String TAG = "WifiListFragment";
+
+	private ListView listView;
+	/** WiFi工具类 */
+	private WifiUtil wifiUtil;
+	/** 扫描WiFi结果列表 */
+	private List<ScanResult> scanResults;
+	/** 是否连接SSID的对话框 */
+	private AlertDialog alertConnectivityDialog;
+	/** WiFi连接延时的对话框 */
+	private AlertDialog alertWifiFailedDialog;
+	/** 是否显示连接SSID对话框 */
+	private boolean isShow = true;
+	private ProgressBar progressBar;
+	/** 系统WiFi连接状态接收者 */
+	private WifiConnectiveReceiver receiver;
+	private WifiConnectiveHandler handler;
+	/** 装载fragment的父容器的引用 */
+	private WifiFragmentActivity activity;
+	/** WiFi连接倒计时 */
+	private CountDownTimer timer;
+	/**
+	 * WiFi连接的时限<br>
+	 * 单位：秒
+	 */
+	private int countTime = 10;
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.wifi_list_fragment, container,
+				false);
+		findViews(view);
+		init();
+		setListener();
+		test();
+		showWifiList();
+		return view;
+	}
+
+	private void test() {
+		// 锁定当前wifi
+		wifiUtil.getSSID();
+		wifiUtil.acquireWifiLock();
+	}
+
+	private void findViews(View view) {
+		listView = (ListView) view.findViewById(R.id.lv_wifi_fragment);
+		progressBar = (ProgressBar) view.findViewById(R.id.pb_wifi_list);
+
+	}
+
+	private void init() {
+		handler = new WifiConnectiveHandler();
+		registWifiConnectiveReceiver();
+		wifiUtil = new WifiUtil(getActivity());
+		createAlertConnectivityDialog();
+		createAlertWifiFailedDialog();
+		createCountDownTimer();
+	}
+
+	private void setListener() {
+		listView.setOnItemClickListener(this);
+	}
+
+	/**
+	 * 显示WiFi列表<br>
+	 * 状态更新完毕，需刷新列表<br>
+	 * Connected,Disconnected
+	 */
+	private void showWifiList() {
+		scanResults = wifiUtil.startScan();
+		if (null != scanResults) {
+			LoggerUtil.d(TAG, "显示wifi列表");
+			listView.setAdapter(new WifiAdapter(getActivity(), scanResults));
+			progressBar.setVisibility(View.GONE);
+		} else {
+			LoggerUtil.d(TAG, "wifi列表为空");
+			// WiFi列表为空，设置等待时限
+		}
+
+	}
+
+	/**
+	 * 如果检测到指定的SSID，并且未连接到指定SSID<br>
+	 * 跳转
+	 */
+	private void gotoNextPage() {
+		if (hasERoadSSID() && !isConnectedSSID() && isShow) {
+			showAlertConnectivityDialog();
+		} else {
+			LoggerUtil.d(TAG, "没有检测到SSID或者已连接SSID====>jump");
+			activity.jump();
+		}
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * 检查WiFi列表中是否含有指定的SSID
+	 * 
+	 * @return
+	 */
+	private boolean hasERoadSSID() {
+		if (null != scanResults && scanResults.size() > 0) {
+			Iterator<ScanResult> iterator = scanResults.iterator();
+			while (iterator.hasNext()) {
+				String ssid = iterator.next().SSID;
+				if (!TextUtils.isEmpty(ssid) && IConstant.SSID.equals(ssid)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 检查是否连接到指定的SSID
+	 * 
+	 * @return
+	 */
+	private boolean isConnectedSSID() {
+		if (IConstant.SSID.equals(wifiUtil.getSSID())) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 连接到指定的SSID<br>
+	 * 此项操作可能导致其他网络连接被禁用
+	 * 
+	 * @return
+	 */
+	private boolean connectToSSID() {
+		WifiConfiguration config = wifiUtil.CreateWifiInfo(IConstant.SSID,
+				null, WifiCipherType.NOPASS);
+		return wifiUtil.addNetwork(config);
+	}
+
+	/**
+	 * 创建连接到9797168.com的对话框
+	 */
+	private void createAlertConnectivityDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		builder.setMessage("检测到9797168.com免费wifi，是否连接?");
+		builder.setPositiveButton(getResources().getString(R.string.ok),
+				new OnClickListener() {// 连接成功之后 jump
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						isShow = false;
+						boolean isConeected = connectToSSID();
+						LoggerUtil.d(TAG, "连接到9797168.com====>" + isConeected);
+						if (!isConeected) {
+							Toast.makeText(getActivity(),
+									"自动连接9797168.com失败，请手动连接",
+									Toast.LENGTH_LONG).show();
+							//TODO 小米不断开当前连接，连接新连接，需要手动跳转
+							activity.jump();
+						}
+					}
+				});
+		builder.setNegativeButton(getResources().getString(R.string.cancle),
+				new OnClickListener() {// 不进行连接,直接jump
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						isShow = true;
+						activity.jump();
+					}
+				});
+		builder.setCancelable(false);
+		alertConnectivityDialog = builder.create();
+	}
+
+	/**
+	 * 当WiFi在指定时间没有建立连接时显示对话框结束此页面
+	 */
+	private void createAlertWifiFailedDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		builder.setMessage("在" + countTime + "秒内没有建立有效的连接，是否继续等待连接?");
+		builder.setPositiveButton(getResources().getString(R.string.ok),
+				new OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// 等待连接
+					}
+				});
+		builder.setNegativeButton(getResources().getString(R.string.cancle),
+				new OnClickListener() {// 不进行连接，直接jump
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						activity.jump();
+					}
+				});
+		builder.setCancelable(false);
+		alertWifiFailedDialog = builder.create();
+	}
+
+	/**
+	 * 显示连接到9797168.com的对话框
+	 */
+	private void showAlertConnectivityDialog() {
+		if (null != alertConnectivityDialog) {
+			if (alertConnectivityDialog.isShowing()) {
+				return;
+			} else {
+				alertConnectivityDialog.show();
+			}
+		}
+	}
+
+	/**
+	 * 显示WiFi在指定时间内没有建立连接的对话框
+	 */
+	private void showAlertWifiFailedDialog() {
+		if (null != alertWifiFailedDialog) {
+			if (alertWifiFailedDialog.isShowing()) {
+				return;
+			} else {
+				alertWifiFailedDialog.show();
+			}
+		}
+	}
+
+	/**
+	 * 关闭对话框
+	 */
+	private void dismissAlertConnectivityDialog() {
+		if (null != alertConnectivityDialog
+				&& alertConnectivityDialog.isShowing()) {
+			alertConnectivityDialog.dismiss();
+		}
+
+	}
+
+	private void dismissAlertWifiFailedDialog() {
+		if (null != alertWifiFailedDialog && alertWifiFailedDialog.isShowing()) {
+			alertWifiFailedDialog.dismiss();
+		}
+	}
+
+	/**
+	 * 设置等待WiFi连接的等待时间
+	 */
+	private void createCountDownTimer() {
+		timer = new CountDownTimer(countTime * 1000, 1000) {
+
+			@Override
+			public void onTick(long millisUntilFinished) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onFinish() {
+				// 在指定时间内没有得到有效的连接
+				showAlertWifiFailedDialog();
+			}
+		};
+	}
+
+	@Override
+	public void onAttach(Activity activity) {
+		this.activity = (WifiFragmentActivity) activity;
+		super.onAttach(activity);
+	}
+
+	/**
+	 * 注册广播接收者
+	 */
+	private void registWifiConnectiveReceiver() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+		receiver = new WifiConnectiveReceiver();
+		getActivity().registerReceiver(receiver, filter);
+	}
+
+	/**
+	 * 注销广播接收
+	 */
+	private void unRegistWifiConnectiveReceiver() {
+		if (null != receiver) {
+			getActivity().unregisterReceiver(receiver);
+		}
+	}
+
+	/**
+	 * 接收系统WiFi连接变更广播<br>
+	 * msg.what<br>
+	 * 0 : State.CONNECTING<br>
+	 * 1 : State.CONNECTED<br>
+	 * 2 : State.DISCONNECTING<br>
+	 * 3 : DISCONNECTED<br>
+	 * 4 : State.SUSPENDED<br>
+	 * 5 : State.UNKNOWN<br>
+	 * 
+	 * @author CaiMeng
+	 * 
+	 */
+	private class WifiConnectiveReceiver extends BroadcastReceiver {
+		/*
+		 * 监听是否连接到一个有效的广播
+		 * WifiManager.WIFI_STATE_DISABLING和WIFI_STATE_DISABLED不会接收到这个广播
+		 */
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			/*
+			 * 系统在接广播WifiManager.WIFI_STATE_ENABLED的同时也会广播此项广播
+			 * 此时刚打开的WiFi肯定还没有连接到有效的无线
+			 */
+			if (intent.getAction().equals(
+					WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+				LoggerUtil.d(TAG, "接收到wifi连接状态变更");
+				Parcelable parcelable = intent
+						.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+				if (null != parcelable) {
+					NetworkInfo networkInfo = (NetworkInfo) parcelable;
+					State state = networkInfo.getState();
+					Message msg = Message.obtain();
+					if (state == State.CONNECTING) {
+						LoggerUtil.d(TAG, "wifi正在连接");
+						msg.what = 0;
+						handler.sendMessage(msg);
+					} else if (state == State.CONNECTED) {
+						LoggerUtil.d(TAG, "wifi已连接");
+						msg.what = 1;
+						handler.sendMessage(msg);
+					} else if (state == State.DISCONNECTING) {
+						LoggerUtil.d(TAG, "wifi正在断开连接");
+						msg.what = 2;
+						handler.sendMessage(msg);
+					} else if (state == State.DISCONNECTED) {
+						LoggerUtil.d(TAG, "wifi已断开连接");
+						msg.what = 3;
+						handler.sendMessage(msg);
+					} else if (state == State.SUSPENDED) {
+						LoggerUtil.d(TAG, "wifi连接已暂停");
+						msg.what = 4;
+						handler.sendMessage(msg);
+					} else {
+						// State.UNKNOWN
+						LoggerUtil.d(TAG, "wifi未连接");
+						msg.what = 5;
+						handler.sendMessage(msg);
+
+					}
+				} else {
+					// scanResults = null;
+				}
+
+			}
+
+		}
+	}
+
+	/**
+	 * 
+	 * @author CaiMeng
+	 * 
+	 */
+	@SuppressLint("HandlerLeak")
+	private class WifiConnectiveHandler extends Handler {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case 0://WiFi正在连接
+				timer.start();
+				showWifiList();
+				break;
+			case 1://WiFi已连接
+				timer.cancel();// 取消计时
+				dismissAlertWifiFailedDialog();
+				gotoNextPage();
+				break;
+			case 2://WiFi正在断开连接
+				showWifiList();
+				break;
+			case 3://WiFi连接已暂停
+				showWifiList();
+				break;
+			case 4://WiFi未连接
+
+				break;
+			case 5:
+
+				break;
+			}
+		}
+
+	}
+
+	@Override
+	public void onDestroyView() {
+		dismissAlertConnectivityDialog();
+		dismissAlertWifiFailedDialog();
+		unRegistWifiConnectiveReceiver();
+		super.onDestroyView();
+	}
+
+}

@@ -1,0 +1,148 @@
+package com.e_road.ui;
+
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.view.KeyEvent;
+import android.webkit.WebView;
+import android.widget.Toast;
+
+import com.e_road.ui.fragment.AdsFragment;
+import com.e_road.ui.fragment.ContentViewPagerFragment;
+import com.e_road.ui.fragment.FragmentCallBack;
+import com.e_road.ui.fragment.WifiFragment;
+import com.e_road.utils.IConstant;
+import com.e_road.utils.LoggerUtil;
+
+/**
+ * 主界面
+ * 
+ * @author CaiMeng
+ * 
+ */
+public class MainFragmentActivity extends BaseFragmentActivity implements
+		FragmentCallBack {
+	private static final String TAG = "MainFragmentActivity";
+	/** FragmentManager */
+	private FragmentManager fm;
+	private int layoutID;
+
+	@Override
+	protected void showViews(FragmentManager fragmentManager, int layoutID) {
+		this.fm = fragmentManager;
+		this.layoutID = layoutID;
+		Bundle bundle = getIntent().getExtras();
+		if (null != bundle) {
+			String showWhat = bundle.getString(IConstant.CONTENT_SHOW);
+			if ("home".equals(showWhat)) {
+				LoggerUtil.d(TAG, "跳转到home");
+				gotoHome(bundle);
+			} else if ("ads".equals(showWhat)) {
+				LoggerUtil.d(TAG, "跳转到ads");
+				gotoAds(bundle);
+			} else if ("wifi".equals(showWhat)) {
+				LoggerUtil.d(TAG, "跳转到wifi");
+				gotoWifi(bundle);
+			} else {
+				LoggerUtil.d(TAG, "跳转到home(else,NO MATCH)");
+				gotoHome(bundle);
+			}
+		} else {
+			LoggerUtil.d(TAG, "跳转到wifi(else,bundle NONE)");
+			gotoHome(bundle);
+		}
+	}
+
+	/**
+	 * 显示WiFi页
+	 */
+	private void gotoWifi(Bundle bundle) {
+		WifiFragment wifiFragment = new WifiFragment();
+		wifiFragment.setArguments(bundle);
+		fm.beginTransaction().replace(layoutID, wifiFragment).commit();
+		// wifiToHome();
+	}
+
+	/**
+	 * 显示主页
+	 */
+	public void gotoHome(Bundle bundle) {
+		ContentViewPagerFragment viewPagerFragment = new ContentViewPagerFragment();
+		viewPagerFragment.setArguments(bundle);
+		fm.beginTransaction().replace(layoutID, viewPagerFragment,"viewPager").commit();
+	}
+
+	/**
+	 * 显示广告
+	 */
+	private void gotoAds(Bundle bundle) {
+		AdsFragment adsFragment = new AdsFragment();
+		adsFragment.setArguments(bundle);
+		// fm.beginTransaction().show(adsFragment).commit();
+		fm.beginTransaction().replace(layoutID, adsFragment).commit();
+	}
+
+	/**
+	 * WiFi跳转到Home
+	 */
+	@Override
+	public void wifiToHome(Bundle bundle) {
+		gotoHome(bundle);
+	}
+
+	@Override
+	protected void showAds(FragmentManager fragmentManager, int layoutID) {
+		// fragmentManager.beginTransaction()
+		// .replace(layoutID, new AdsMarqueeFragment()).commit();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		LoggerUtil.d("MainFragmentActivity", "onResume");
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+//			LoggerUtil.d(TAG, "backStackCount=" + fm.getBackStackEntryCount());
+			Fragment fragment = fm.findFragmentByTag("viewPager");
+			if(fragment instanceof ContentViewPagerFragment){
+				click2Exist(); // 调用双击退出函数
+				return true;
+			}
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
+	/** 记录按下回退键的时间 */
+	private long exitTime = 0;
+
+	/**
+	 * 双击退出函数
+	 */
+	private void click2Exist() {
+
+		if ((System.currentTimeMillis() - exitTime) > 2000) {
+			Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+			exitTime = System.currentTimeMillis();
+		} else {
+			super.exist();
+		}
+
+	}
+
+	@Override
+	protected void logoutRefresh() {
+		ContentViewPagerFragment contentViewPagerFragment = (ContentViewPagerFragment) fm
+				.findFragmentByTag("viewPager");
+		contentViewPagerFragment.logoutFragments();
+	}
+	
+	@Override
+	protected void onDestroy() {
+		fm = null;
+		finish();
+		super.onDestroy();
+	}
+}

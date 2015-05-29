@@ -1,0 +1,146 @@
+package com.e_road.utils;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.widget.Toast;
+
+import com.e_road.ui.LoginFragmentActivity;
+import com.e_road.utils.NetUtil.NetStatus;
+import com.e_road.vo.RequestVo;
+
+/**
+ * 与服务器交互
+ * @author CaiMeng
+ *
+ */
+public class Interactive {
+	private Context context;
+	/** 线程池 */
+	private ThreadPoolManager poolManager;
+	/** 进行中的任务 */
+	private Vector<Task> record = new Vector<Task>();
+	
+	/** 与服务器交互的对象 */
+	public Interactive(Context context){
+		this.context = context;
+		poolManager = ThreadPoolManager.getInstatnce();
+	}
+	
+	/**
+	 * 从服务器端获取数据
+	 * 
+	 * @param requestVo
+	 * @param callback
+	 */
+	@SuppressWarnings("rawtypes")
+	public void getDataFromServer(RequestVo requestVo, DataCallBack callBack) {
+		
+		BaseHandler handler = new BaseHandler(context, callBack);
+		Task task = new Task(context, requestVo, handler);
+		record.add(task);
+		poolManager.addTask(task);
+	}
+	
+	public abstract interface DataCallBack<T> {
+		public abstract void progressData(T param);
+	}
+	
+	@SuppressLint("HandlerLeak")
+	class BaseHandler extends Handler {
+		private Context context;
+		@SuppressWarnings("rawtypes")
+		private DataCallBack callBack;
+
+		@SuppressWarnings("rawtypes")
+		public BaseHandler(Context context, DataCallBack callBack) {
+			super();
+			this.context = context;
+			this.callBack = callBack;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case IConstant.NETWORK_OK:
+				if (null == msg.obj) {
+					Toast.makeText(context, "获取的数据为空", Toast.LENGTH_SHORT).show();
+				} else {
+					callBack.progressData(msg.obj);
+				}
+				break;
+			case IConstant.NETWORK_FAILED:
+				Toast.makeText(context, "网络不可用", Toast.LENGTH_SHORT).show();
+				break;
+			}
+		}
+
+	}
+	
+	/**
+	 * 访问网络的线程
+	 * @author CaiMeng
+	 *
+	 */
+	class Task implements Runnable {
+		private RequestVo requestVo;
+		private Handler handler;
+		private Context context;
+
+		public Task(Context context, RequestVo requestVo, Handler handler) {
+			super();
+			this.context = context;
+			this.requestVo = requestVo;
+			this.handler = handler;
+		}
+
+		@Override
+		public void run() {
+			Object obj = null;
+			Message msg = Message.obtain();
+			try {
+				if (NetUtil.hasNetwork(context)) {
+					obj = NetUtil.post(requestVo);
+					if (obj instanceof NetStatus) {
+						Map<String, String> map_sp_clean = new HashMap<String, String>();
+						map_sp_clean.put(IConstant.LOGIN_USER_NAME, "");
+						map_sp_clean.put("nickname", "");
+						CommonUtil.saveSharedPreferences(context, "sp", map_sp_clean);
+						//跳转到登录界面
+						Intent intent = new Intent(context,
+								LoginFragmentActivity.class);
+						Bundle bundle = new Bundle();
+						bundle.putBoolean(IConstant.IK_BASE_LOGIN_NOT, true);
+						((Activity)context).startActivityForResult(intent,
+								IConstant.REQUESTCODE_BASE_LOGIN_NOT);
+					} else {
+						msg.what = IConstant.NETWORK_OK;
+						msg.obj = obj;
+						handler.sendMessage(msg);
+						record.remove(this);
+					}
+				} else {
+					msg.what = IConstant.NETWORK_FAILED;
+					msg.obj = obj;
+					handler.sendMessage(msg);
+					record.remove(this);
+				}
+			} catch (Exception e) {
+				record.remove(this);
+				throw new RuntimeException(e);
+			}
+
+		}
+
+	}
+
+}

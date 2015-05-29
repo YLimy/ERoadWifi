@@ -1,0 +1,55 @@
+package com.e_road.ui.fragment;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.e_road.R;
+import com.e_road.utils.CommonUtil;
+import com.e_road.utils.IConstant;
+
+/**
+ * 我的标签显示的fragment
+ * @author CaiMeng
+ *
+ */
+public class MineFragment extends Fragment {
+	private TextView tv_mine;
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.mine_fragment, container, false);
+		findViews(view);
+		init();
+		setListener();
+		return view;
+	}
+
+	private void findViews(View view) {
+		tv_mine = (TextView) view.findViewById(R.id.tv_mine_frag);
+	}
+
+	private void init() {
+		if(CommonUtil.isLogin(getActivity())){
+			tv_mine.setText(getActivity().getSharedPreferences("sp",
+					Context.MODE_PRIVATE).getString(IConstant.LOGIN_USER_NAME, ""));
+		}else{
+			tv_mine.setText("未登录");
+		}
+	}
+
+	private void setListener() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void invisibleOnScreen() {
+		//TODO
+	}
+
+}

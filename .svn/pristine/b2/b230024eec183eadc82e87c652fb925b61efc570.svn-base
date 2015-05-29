@@ -1,0 +1,62 @@
+<!-- 主界面actionBar中的Menu布局 -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.e_road.ui.BaseActivity" >
+
+<!--     <item android:id="@+id/action_search" -->
+<!--         android:icon="@drawable/actionbar_search_icon" -->
+<!--         android:actionViewClass="android.widget.SearchView" -->
+<!--         android:showAsAction="always" -->
+<!--         android:title="@string/menu_main_search"/> -->
+    
+    <!-- 添加 -->
+<!--     <item android:id="@+id/action_add" -->
+<!--         android:icon="@drawable/actionbar_add_icon" -->
+<!--         android:actionProviderClass="com.e_road.provider.AddActionProvider" -->
+<!--         android:showAsAction="always" -->
+<!--         android:title="@string/menu_main_add"/> -->
+
+<!-- 	<item -->
+<!--     android:id="@+id/action_add" -->
+<!--     android:icon="@drawable/actionbar_add_icon" -->
+<!--     android:showAsAction="always" -->
+<!--     android:title="@string/menu_main_add"/> -->
+
+	<!-- 刷新 -->
+    <item android:id="@+id/action_overflow_refresh"
+        android:icon="@drawable/actionbar_refresh"
+        android:showAsAction="always"
+        android:title="@string/menu_main_refresh"/>
+    
+    <!-- 登录 -->
+    <item android:id="@+id/action_overflow_login"
+        android:icon="@drawable/ofm_add_icon"
+        android:title="@string/menu_main_login"
+        android:showAsAction="never"/>
+    
+    <!-- 注销 -->
+    <item android:id="@+id/action_overflow_logout"
+        android:icon="@drawable/ofm_photo_icon"
+        android:title="@string/menu_main_logout"
+        android:visible="false"
+        android:showAsAction="never"/>
+    
+    <!-- WiFi列表 -->
+    <item android:id="@+id/action_overflow_wifi"
+        android:icon="@drawable/ofm_photo_icon"
+        android:title="@string/menu_main_list"
+        android:showAsAction="never"/>
+    <!-- 设置 -->
+    <item
+        android:id="@+id/action_overflow_settings"
+        android:icon="@drawable/ofm_setting_icon"
+        android:title="@string/menu_main_settings"
+        app:showAsAction="never"/>
+    <!-- 退出 -->
+    <item android:id="@+id/action_overflow_exit"
+        android:icon="@drawable/ofm_collect_icon"
+        android:title="@string/menu_main_exit"
+        android:showAsAction="never"/>
+    
+</menu>

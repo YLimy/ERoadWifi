@@ -1,0 +1,250 @@
+package com.e_road.ui.fragment;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.e_road.R;
+import com.e_road.ui.WifiFragmentActivity;
+import com.e_road.utils.LoggerUtil;
+import com.e_road.utils.WifiUtil;
+
+/**
+ * WiFi未开启时的界面<br>
+ * 关闭/正在开启
+ * 
+ * @author CaiMeng
+ * 
+ */
+public class WifiClosedFragment extends Fragment implements OnClickListener {
+	private static final String TAG = "WifiClosedFragment";
+
+	private TextView tv_information;
+	private Button bt_open;
+	private Button bt_cancle;
+	private Button bt_close;
+
+	private WifiStateChangeReceiver receiver;
+	private WifiStateHandler handler;
+	private WifiStateCallBack callBack;
+	private WifiFragmentActivity activity;
+	private WifiUtil wifiUtil;
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.wifi_nowifi_frag, container,
+				false);
+		findViews(view);
+		init();
+		setListener();
+		return view;
+	}
+
+	private void findViews(View view) {
+		tv_information = (TextView) view.findViewById(R.id.tv_wifi_nowifi);
+		bt_open = (Button) view.findViewById(R.id.bt_wifi_nowifi_open);
+		bt_cancle = (Button) view.findViewById(R.id.bt_wifi_nowifi_cancle);
+		bt_close = (Button) view.findViewById(R.id.bt_wifi_nowifi_close);
+	}
+
+	private void init() {
+		handler = new WifiStateHandler();
+		registWifiStateChangeReceiver();
+		wifiUtil = new WifiUtil(getActivity());
+	}
+
+	private void setListener() {
+		bt_open.setOnClickListener(this);
+		bt_cancle.setOnClickListener(this);
+		bt_close.setOnClickListener(this);
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.bt_wifi_nowifi_open:
+			wifiUtil.openWifi();
+			break;
+		case R.id.bt_wifi_nowifi_cancle:
+			bt_open.setEnabled(false);
+			activity.jump();
+			break;
+		case R.id.bt_wifi_nowifi_close:
+			wifiUtil.closeWifi();
+			break;
+		}
+	}
+
+	/**
+	 * 注册WiFi状态接收者
+	 */
+	private void registWifiStateChangeReceiver() {
+		IntentFilter filter = new IntentFilter();
+		// filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+		filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+		receiver = new WifiStateChangeReceiver();
+		getActivity().registerReceiver(receiver, filter);
+	}
+
+	/**
+	 * 注销接收
+	 */
+	private void unregistWifiStateChangeReceiver() {
+		if (null != receiver) {
+			getActivity().unregisterReceiver(receiver);
+		}
+	}
+
+	/**
+	 * 与activity间通信的接口
+	 * 
+	 * @author CaiMeng
+	 * 
+	 */
+	public interface WifiStateCallBack {
+		public abstract void callBack();
+	}
+
+	@Override
+	public void onAttach(Activity activity) {
+		callBack = (WifiStateCallBack) activity;
+		this.activity = (WifiFragmentActivity) activity;
+		super.onAttach(activity);
+	}
+
+	/**
+	 * 接收系统广播
+	 * 
+	 * @author CaiMeng
+	 * 
+	 */
+	private class WifiStateChangeReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction()
+					.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
+				LoggerUtil.d(TAG, "接收到wifi变更广播");
+				int wifiState = intent.getIntExtra(
+						WifiManager.EXTRA_WIFI_STATE,
+						WifiManager.WIFI_STATE_DISABLED);
+				Message msg = Message.obtain();
+				switch (wifiState) {
+				case WifiManager.WIFI_STATE_DISABLED:
+					LoggerUtil.d(TAG, "wifi不可用");
+					msg.what = WifiManager.WIFI_STATE_DISABLED;
+					Bundle bundle_disabled = new Bundle();
+					bundle_disabled.putString("wifiState", "disabled");
+					msg.setData(bundle_disabled);
+					handler.sendMessage(msg);
+					break;
+				case WifiManager.WIFI_STATE_ENABLING:
+					LoggerUtil.d(TAG, "wifi正在开启");
+					msg.what = WifiManager.WIFI_STATE_ENABLING;
+					Bundle bundle_enabling = new Bundle();
+					bundle_enabling.putString("wifiState", "enabling");
+					msg.setData(bundle_enabling);
+					handler.sendMessage(msg);
+					break;
+				case WifiManager.WIFI_STATE_ENABLED:
+					LoggerUtil.d(TAG, "wifi已开启");
+					msg.what = WifiManager.WIFI_STATE_ENABLED;
+					Bundle bundle_enabled = new Bundle();
+					bundle_enabled.putString("wifiState", "enabled");
+					msg.setData(bundle_enabled);
+					handler.sendMessage(msg);
+					break;
+				case WifiManager.WIFI_STATE_DISABLING:
+					LoggerUtil.d(TAG, "wifi正在关闭");
+					msg.what = WifiManager.WIFI_STATE_DISABLING;
+					Bundle bundle_disabling = new Bundle();
+					bundle_disabling.putString("wifiState", "disabling");
+					msg.setData(bundle_disabling);
+					handler.sendMessage(msg);
+					break;
+				case WifiManager.WIFI_STATE_UNKNOWN:
+					LoggerUtil.d(TAG, "wifi未知状态");
+					msg.what = WifiManager.WIFI_STATE_UNKNOWN;
+					Bundle bundle_unknown = new Bundle();
+					bundle_unknown.putString("wifiState", "unknown");
+					msg.setData(bundle_unknown);
+					handler.sendMessage(msg);
+					break;
+				}
+			} else if (intent.getAction().equals(
+					ConnectivityManager.CONNECTIVITY_ACTION)) {
+				LoggerUtil.d(TAG, "接收到网络状态变更广播");
+			}
+		}
+
+	}
+
+	@SuppressLint("HandlerLeak")
+	private class WifiStateHandler extends Handler {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case WifiManager.WIFI_STATE_DISABLED:
+				tv_information.setText("wifi已关闭");
+				bt_open.setEnabled(true);
+				bt_open.setVisibility(View.VISIBLE);
+				bt_cancle.setEnabled(true);
+				bt_cancle.setVisibility(View.VISIBLE);
+				bt_close.setVisibility(View.GONE);
+				break;
+			case WifiManager.WIFI_STATE_ENABLING:
+				tv_information.setText("wifi正在开启");
+				bt_open.setEnabled(false);
+				bt_close.setEnabled(false);
+				break;
+			case WifiManager.WIFI_STATE_ENABLED:
+				tv_information.setText("wifi已开启");
+				bt_open.setEnabled(false);
+				bt_open.setVisibility(View.GONE);
+				bt_cancle.setEnabled(false);
+				bt_cancle.setVisibility(View.GONE);
+				bt_close.setEnabled(true);
+				bt_close.setVisibility(View.VISIBLE);
+				if (null != callBack) {
+					callBack.callBack();
+				} else {
+					LoggerUtil.d(TAG, "回调没有初始化");
+				}
+				break;
+			case WifiManager.WIFI_STATE_DISABLING:
+				tv_information.setText("wifi正在关闭");
+				bt_open.setEnabled(false);
+				bt_close.setEnabled(false);
+				break;
+			case WifiManager.WIFI_STATE_UNKNOWN:
+				tv_information.setText("wifi不可用");
+				break;
+			}
+		}
+
+	}
+
+	@Override
+	public void onDestroyView() {
+		unregistWifiStateChangeReceiver();
+		super.onDestroyView();
+	}
+
+}

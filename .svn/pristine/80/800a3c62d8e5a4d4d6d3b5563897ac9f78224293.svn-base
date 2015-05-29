@@ -1,0 +1,31 @@
+package com.e_road.utils;
+
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+
+public class DialogUtil {
+
+	/**
+	 * 提示对话框
+	 * @param context 上下文
+	 * @param Title 标题栏
+	 * @param msg 提示信息
+	 * @param positiveStr 确定 || 是  ||  OK ...and so on
+	 */
+	public static void showDialog(Context context,String Title,String msg,String positiveStr){
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle(Title);
+		builder.setMessage(msg);
+		builder.setPositiveButton(positiveStr, new OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		builder.show();
+	}
+}

@@ -1,0 +1,183 @@
+package com.e_road.ui;
+
+import com.e_road.utils.IConstant;
+import com.e_road.R;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.view.KeyEvent;
+import android.view.View;
+import android.webkit.HttpAuthHandler;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.Toast;
+
+public class HomeActivity extends BaseActivity {
+
+	/** webView */
+	private WebView wv_home;
+	/** 网络是否可用 */
+	private boolean isNetwork = true;
+	/** 是否刷新页面 */
+	private boolean isReflash = false;
+	private String urlCache = null;;
+	
+	/** 接收网络状态变更 */
+	private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+		
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			ConnectivityManager connectManager = 
+					(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+			NetworkInfo networkInfo = connectManager.getActiveNetworkInfo();
+			if(null != networkInfo && networkInfo.isAvailable()){
+				isNetwork = true;
+			}else{
+				isNetwork = false;
+			}
+			
+		}
+	};
+
+	@Override
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void loadView() {
+		setContentView(R.layout.home);
+		selectedButtomTab(IConstant.BUTTOM_1);
+		showProgressDialog();
+	}
+
+	@Override
+	public void findViews() {
+		wv_home = (WebView) findViewById(R.id.wv_home);
+		setWebViewConfigure();
+	}
+
+	@Override
+	public void setListener() {
+		wv_home.setWebViewClient(new WebViewClient() {
+
+			@Override
+			public boolean shouldOverrideUrlLoading(WebView view, String url) {
+				// 超链接在当前webview中跳转，而不是调用浏览器
+				wv_home.loadUrl(url);
+				return true;
+			}
+
+			@Override
+			public void onPageStarted(WebView view, String url, Bitmap favicon) {
+				// 页面加载开始时调用
+				urlCache = url;
+				if(!isNetwork){
+					//TODO 此处调用了两次 1.目标页面；2.404页面；
+					Toast.makeText(HomeActivity.this, "网络不可用", Toast.LENGTH_LONG).show();
+					return;
+				}
+				if (url.endsWith(".apk")) {
+					// TODO 下载apk文件
+				}
+				super.onPageStarted(view, url, favicon);
+			}
+
+			@Override
+			public void onPageFinished(WebView view, String url) {
+				// TODO 页面加载结束时调用
+				super.onPageFinished(view, url);
+				closeProgressDialog();
+			}
+
+			@Override
+			public void onReceivedError(WebView view, int errorCode,
+					String description, String failingUrl) {
+				// TODO Auto-generated method stub
+				super.onReceivedError(view, errorCode, description, failingUrl);
+			}
+
+			@Override
+			public void onReceivedHttpAuthRequest(WebView view,
+					HttpAuthHandler handler, String host, String realm) {
+				// TODO Auto-generated method stub
+				super.onReceivedHttpAuthRequest(view, handler, host, realm);
+			}
+
+		});
+		
+		IntentFilter mFilter = new IntentFilter();
+		mFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+		registerReceiver(mReceiver, mFilter);
+	}
+	
+
+	@Override
+	protected void onDestroy() {
+		unregisterReceiver(mReceiver);
+		super.onDestroy();
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		/*
+		 * 1.加载视图时不重复刷新
+		 * 2.网络从不可用变为可用时刷新页面
+		 */
+		if(isNetwork){
+			if(isReflash && null != urlCache){
+				reflashView(urlCache);
+				isReflash = false;
+			}
+		}else{
+			isReflash = true;
+		}
+	}
+	/**
+	 * 刷新页面
+	 * @param url
+	 */
+	private void reflashView(String url){
+		wv_home.loadUrl(url);
+	}
+
+	@Override
+	public void progressLogic() {
+		wv_home.loadUrl("http://www.baidu.com");
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		// 回退，并且webview不是第一页时
+		if ((keyCode == KeyEvent.KEYCODE_BACK) && wv_home.canGoBack()) {
+			wv_home.goBack();
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
+	/**
+	 * 配置webview的参数
+	 */
+	private void setWebViewConfigure() {
+		// 支持javascript
+		wv_home.getSettings().setJavaScriptEnabled(true);
+		// webview的内容全屏或者充满父框架
+		wv_home.getSettings().setLoadWithOverviewMode(true);
+		// 设置任意比例缩放available
+		wv_home.getSettings().setUseWideViewPort(true);
+		// 支持缩放
+		wv_home.getSettings().setBuiltInZoomControls(true);
+		//取消滚动条
+		wv_home.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
+		//触摸焦点起作用
+		wv_home.requestFocus();
+	}
+}

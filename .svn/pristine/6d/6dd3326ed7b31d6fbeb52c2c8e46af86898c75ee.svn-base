@@ -1,0 +1,294 @@
+package com.e_road.ui.fragment;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.text.InputType;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.e_road.R;
+import com.e_road.ui.LoginFragmentActivity;
+import com.e_road.utils.CommonUtil;
+import com.e_road.utils.IConstant;
+import com.e_road.utils.Interactive;
+import com.e_road.utils.LoggerUtil;
+import com.e_road.utils.parser.UserModifyParser;
+import com.e_road.vo.RequestVo;
+import com.e_road.vo.UserInfo;
+
+/**
+ * 我的标签显示的fragment
+ * 
+ * @author CaiMeng
+ * 
+ */
+public class MineFragment extends ViewPagerBaseFragment implements OnClickListener{
+	private static final String TAG = "MineFragment";
+
+	private EditText et_nickname;
+	private EditText et_username;
+	private EditText et_pwd;
+	private EditText et_pwdr;
+
+	private Button bt_confirm;
+	private Button bt_gotoLogin;
+	private Button bt_pwd_modify;
+	private Button bt_pwd_show;
+
+	private TextView tv_msg;
+
+	private LinearLayout ll_pwdr;
+
+	private Interactive interactive;
+	/** 是否显示重复密码框 */
+	private boolean isPwdr = true;
+	/** 是否显示密码 */
+	private int passwordType;
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater
+				.inflate(R.layout.modify_fragment, container, false);
+		findViews(view);
+		interactive = new Interactive(getActivity());
+		setListener();
+		return view;
+	}
+
+	private void findViews(View view) {
+		et_nickname = (EditText) view
+				.findViewById(R.id.et_modify_frag_nickname);
+		et_username = (EditText) view
+				.findViewById(R.id.et_modify_frag_username);
+		et_pwd = (EditText) view.findViewById(R.id.et_modify_frag_password);
+		et_pwdr = (EditText) view
+				.findViewById(R.id.et_modify_frag_password_repeat);
+
+		bt_confirm = (Button) view.findViewById(R.id.bt_modify_frag_confirm);
+		bt_gotoLogin = (Button) view
+				.findViewById(R.id.bt_modify_frag_goto_login);
+		bt_pwd_modify = (Button) view
+				.findViewById(R.id.bt_modify_frag_pwd_show);
+		bt_pwd_show = (Button) view.findViewById(R.id.bt_modify_frag_pwdr_show);
+		ll_pwdr = (LinearLayout) view
+				.findViewById(R.id.ll_modify_frag_password_repeat);
+		tv_msg = (TextView) view.findViewById(R.id.tv_modify_frag_msg);
+	}
+
+	@Override
+	public void onResume() {
+		showViews();
+		super.onResume();
+	}
+
+	public void showViews() {
+		if (CommonUtil.isLogin(getActivity())) {
+			showUserModify();
+		} else {
+			showUserNotLogin();
+		}
+	}
+
+	/**
+	 * 显示已登录用户的修改界面
+	 */
+	private void showUserModify() {
+		cleanViewText();
+		tv_msg.setVisibility(View.GONE);
+		et_nickname.setEnabled(true);
+		et_pwd.setEnabled(true);
+		bt_pwd_modify.setEnabled(true);
+		ll_pwdr.setVisibility(View.GONE);
+		bt_confirm.setVisibility(View.VISIBLE);
+		bt_gotoLogin.setVisibility(View.GONE);
+		setUserData();
+	}
+
+	/**
+	 * 已登录用户的信息
+	 */
+	private void setUserData() {
+		SharedPreferences sp = getActivity().getSharedPreferences("sp",
+				Context.MODE_PRIVATE);
+		et_username.setText(sp.getString(IConstant.LOGIN_USER_NAME, ""));
+		et_nickname.setText(sp.getString("nickname", ""));
+	}
+
+	/**
+	 * 显示未登录用户的修改界面
+	 */
+	private void showUserNotLogin() {
+		cleanViewText();
+		tv_msg.setVisibility(View.GONE);
+		et_nickname.setEnabled(false);
+		et_username.setText("未登录用户");
+		et_pwd.setEnabled(false);
+		bt_pwd_modify.setEnabled(false);
+		ll_pwdr.setVisibility(View.GONE);
+		bt_confirm.setVisibility(View.GONE);
+		bt_gotoLogin.setVisibility(View.VISIBLE);
+	}
+
+	private void setListener() {
+		bt_confirm.setOnClickListener(this);
+		bt_gotoLogin.setOnClickListener(this);
+		bt_pwd_modify.setOnClickListener(this);
+		bt_pwd_show.setOnClickListener(this);
+	}
+
+	/**
+	 * 清除控件数据
+	 */
+	private void cleanViewText() {
+		et_nickname.getText().clear();
+		et_username.getText().clear();
+		et_pwd.getText().clear();
+		et_pwdr.getText().clear();
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.bt_modify_frag_confirm:
+			modifiedConfirm();
+			break;
+		case R.id.bt_modify_frag_goto_login:
+			startActivity(new Intent(getActivity(), LoginFragmentActivity.class));
+			break;
+		case R.id.bt_modify_frag_pwd_show:
+			if (isPwdr) {
+				et_pwd.setEnabled(true);
+				bt_pwd_modify.setText("取消");
+				ll_pwdr.setVisibility(View.VISIBLE);
+				isPwdr = false;
+			} else {
+				et_pwd.setEnabled(false);
+				bt_pwd_modify.setText("修改");
+				ll_pwdr.setVisibility(View.GONE);
+				isPwdr = true;
+			}
+			break;
+		case R.id.bt_modify_frag_pwdr_show:
+			showPassword();
+			break;
+		}
+	}
+	
+	/**
+	 * 显示密码
+	 */
+	private void showPassword() {
+		passwordType = et_pwd.getInputType();
+		if (InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD == passwordType) {
+			et_pwd.setInputType(InputType.TYPE_CLASS_TEXT
+					| InputType.TYPE_TEXT_VARIATION_PASSWORD);
+			et_pwdr.setInputType(InputType.TYPE_CLASS_TEXT
+					| InputType.TYPE_TEXT_VARIATION_PASSWORD);
+		} else {
+			et_pwd
+					.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+			et_pwdr
+			.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+		}
+	}
+
+	/**
+	 * 提交修改的信息
+	 */
+	private void modifiedConfirm() {
+		String nickname = et_nickname.getText().toString().trim();
+		String pwd = et_pwd.getText().toString().trim();
+		String pwdr = et_pwdr.getText().toString().trim();
+		if (TextUtils.isEmpty(nickname)) {
+			Toast.makeText(getActivity(), "昵称不能为空", Toast.LENGTH_LONG).show();
+			return;
+		}
+		if (!pwd.equals(pwdr)) {
+			Toast.makeText(getActivity(), "两次输入的密码不一致", Toast.LENGTH_LONG)
+					.show();
+			et_pwd.getText().clear();
+			et_pwdr.getText().clear();
+			return;
+		}
+		String username = et_username.getText().toString().trim();
+		if (null == username)
+			return;
+		HashMap<String, String> requestMap = new HashMap<String, String>();
+		requestMap.put("nickname", nickname);
+		requestMap.put("username", username);
+		if (!TextUtils.isEmpty(pwd)) {
+			// 只修改昵称时不需要密码
+			requestMap.put("password", pwd);
+		}
+
+		RequestVo requestVo = new RequestVo(R.string.url_modify, getActivity(),
+				requestMap, new UserModifyParser());
+		interactive.getDataFromServer(requestVo,
+				new Interactive.DataCallBack<Object>() {
+
+					@Override
+					public void progressData(Object param) {
+						if (param instanceof UserInfo) {
+							Toast.makeText(getActivity(), "修改成功",
+									Toast.LENGTH_LONG).show();
+							UserInfo user = (UserInfo) param;
+
+							// 将登录用户记入SharedPreferences
+							Map<String, String> map_sp = new HashMap<String, String>();
+							map_sp.put(IConstant.LOGIN_USER_NAME,
+									user.getUsername());
+							map_sp.put("nickname", user.getNickname());
+							CommonUtil.saveSharedPreferences(getActivity(),
+									"sp", map_sp);
+							showUserModify();
+						} else if (param instanceof String) {
+							tv_msg.setText((String) param);
+							tv_msg.setVisibility(View.VISIBLE);
+						}
+					}
+				});
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == IConstant.REQUESTCODE_BASE_LOGIN_NOT) {
+			if (resultCode == IConstant.RESULTCODE_LOGIN_LOGIN) {
+				LoggerUtil.d(TAG, "从LoginFragment中跳转过来");
+				showViews();
+			}
+		}
+	}
+
+	@Override
+	public void onRefresh() {
+		showViews();
+	}
+
+	@Override
+	public void onBack() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String onSaveUrl() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

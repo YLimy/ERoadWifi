@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="home_item_selector">#ffc9c9c9</color>
+    <color name="black">#000000</color>
+    
+    <color name="white">#fff</color>
+    <color name="green">#ff4f8c0b</color>
+    <color name="light_green">#66ff00</color>
+    <color name="blue">#ff1869af</color>
+    <color name="transparency">#00000000</color>
+    <color name="shadow">#1e000000</color>
+    <color name="grey">#ff5b5a5a</color>
+    <color name="light_gray">#ffebebeb</color>
+    <color name="deep_gray">#ff3b3b3b</color>
+    <color name="line_grey">#CDCDCD</color>
+
+</resources>

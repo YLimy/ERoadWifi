@@ -1,0 +1,114 @@
+package com.e_road.ui.fragment;
+
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnKeyListener;
+import android.view.ViewGroup;
+import android.webkit.WebView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+
+import com.e_road.R;
+import com.e_road.utils.IWebSettingsUtils;
+import com.e_road.utils.IWebSettingsUtils.WebLoadError;
+import com.e_road.utils.WebViewDownLoadListener;
+
+/**
+ * 应用标签的fragment
+ * 
+ * @author CaiMeng
+ * 
+ */
+public class AppsFragment extends Fragment implements WebLoadError {
+
+	/** webView控件 */
+	private WebView webView;
+	/** 进度条 */
+	private ProgressBar progressBar;
+	/** WebKit配置 */
+	private IWebSettingsUtils settings;
+	private LinearLayout layout;
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.apps_fragment, container, false);
+		findViews(view);
+		init();
+		setListener();
+		loadUrl();
+		return view;
+	}
+
+	private void findViews(View view) {
+		layout = (LinearLayout) view.findViewById(R.id.ll_apps_frag);
+		// webView = (WebView) view.findViewById(R.id.wv_apps_frag);
+		progressBar = (ProgressBar) view.findViewById(R.id.pb_apps_frag);
+	}
+
+	private void init() {
+		webView = new WebView(getActivity().getApplicationContext());
+		layout.addView(webView);
+		settings = new IWebSettingsUtils(getActivity(), webView, this,
+				progressBar);
+		settings.setWebViewConfigure();
+	}
+
+	/**
+	 * 加载页面
+	 */
+	private void loadUrl() {
+		// webView.clearCache(false);
+		webView.loadUrl(getResources().getString(R.string.url_apps));
+	}
+
+	public void refresh() {
+		webView.reload();
+	}
+
+	private void setListener() {
+		webView.setOnKeyListener(new OnKeyListener() {
+
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				// 监听按键：按下
+				if (event.getAction() == KeyEvent.ACTION_DOWN) {
+					// 是否回退键
+					if ((keyCode == KeyEvent.KEYCODE_BACK)
+							&& webView.canGoBack()) {
+						webView.goBack();
+						return true;
+					}
+				}
+				return false;
+			}
+		});
+
+		webView.setDownloadListener(new WebViewDownLoadListener(getActivity()));
+	}
+
+	@Override
+	public void onStop() {
+		webView.freeMemory();
+		super.onStop();
+	}
+
+	@Override
+	public void onDestroy() {
+		webView = null;
+		progressBar = null;
+		if (null != settings) {
+			settings.unregisterReceiver();
+		}
+		super.onDestroy();
+		layout = null;
+	}
+
+	@Override
+	public void error(String file) {
+		webView.loadUrl(file);
+	}
+}

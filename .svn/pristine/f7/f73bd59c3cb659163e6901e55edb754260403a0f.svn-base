@@ -1,0 +1,383 @@
+package com.e_road.ui;
+
+import java.util.Vector;
+
+import com.e_road.utils.IConstant;
+import com.e_road.utils.DialogUtil;
+import com.e_road.utils.NetUtil;
+import com.e_road.utils.NetUtil.NetStatus;
+import com.e_road.utils.ThreadPoolManager;
+import com.e_road.vo.RequestVo;
+import com.e_road.R;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+
+/**
+ * 主界面的activity
+ * @author CaiMeng
+ *
+ */
+public abstract class BaseActivity extends Activity implements OnClickListener{
+	
+	/** 左上按钮 */
+	private Button bt_left;
+	/** 右上按钮 */
+	private Button bt_right;
+	
+	/** 下方图标01 */
+	private ImageView iv_buttom_1;
+	/** 下方图标02 */
+	private ImageView iv_buttom_2;
+	/** 下方图标03 */
+	private ImageView iv_buttom_3;
+	/** 下方图标04 */
+	private ImageView iv_buttom_4;
+	/** 下方图标05 */
+	private ImageView iv_buttom_5;
+	
+	/** 中部线性布局 */
+	private LinearLayout ll_fm_content;
+	
+	/** 主界面的事件监听 */
+	private BaseClickListener baseClickListener;
+	/** 中部显示区的引用 */
+	private View inflate;
+	/** 页面加载提示框 */
+	protected ProgressDialog progressDialog;
+	/** 线程池 */
+	private ThreadPoolManager poolManager;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+		super.setContentView(R.layout.frament_main);
+		poolManager = ThreadPoolManager.getInstatnce();
+		//自定义标题栏
+		
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title);
+		
+		baseClickListener = new BaseClickListener();
+		
+		initContentView();
+	}
+	
+	/**
+	 * 主界面初始化方法
+	 */
+	private void initContentView(){
+		findContentView();
+		selectedButtomTab(IConstant.BUTTOM_1);
+		setContentListener();
+		progressContentLogic();
+		
+		initLayoutView();
+	}
+	
+	/**
+	 * 加载中间视图<br>
+	 * id为ll_fm_content的线性布局内容的填充
+	 */
+	private void initLayoutView() {
+		loadView();
+		findViews();
+		setListener();
+		progressLogic();
+	}
+
+	/**
+	 * 查找主界面控件
+	 */
+	private void findContentView(){
+		bt_left = (Button) super.findViewById(R.id.bt_head_left);
+		bt_right = (Button) super.findViewById(R.id.bt_head_right);
+		
+		iv_buttom_1 = (ImageView) super.findViewById(R.id.iv_fm_buttom_1);
+		iv_buttom_2 = (ImageView) super.findViewById(R.id.iv_fm_buttom_2);
+		iv_buttom_3 = (ImageView) super.findViewById(R.id.iv_fm_buttom_3);
+		iv_buttom_4 = (ImageView) super.findViewById(R.id.iv_fm_buttom_4);
+		iv_buttom_5 = (ImageView) super.findViewById(R.id.iv_fm_buttom_5);
+		
+		ll_fm_content = (LinearLayout) super.findViewById(R.id.ll_fm_content);
+	}
+	
+	/**
+	 * 添加主界面监听器
+	 */
+	private void setContentListener(){
+		bt_left.setOnClickListener(baseClickListener);
+		bt_right.setOnClickListener(baseClickListener);
+		
+		iv_buttom_1.setOnClickListener(baseClickListener);
+		iv_buttom_2.setOnClickListener(baseClickListener);
+		iv_buttom_3.setOnClickListener(baseClickListener);
+		iv_buttom_4.setOnClickListener(baseClickListener);
+		iv_buttom_5.setOnClickListener(baseClickListener);
+	}
+	
+	/**
+	 * 主界面与服务器交互
+	 */
+	private void progressContentLogic(){
+		
+	}
+	
+	/**
+	 * 改变选定按钮图标的背景样式
+	 * @param paramId 按钮或图标在Constant中对应的标识值
+	 */
+	protected void selectedButtomTab(int paramId) {
+		
+		iv_buttom_1.setBackgroundResource(R.drawable.bar_1_normal);
+		iv_buttom_2.setBackgroundResource(R.drawable.bar_2_normal);
+		iv_buttom_3.setBackgroundResource(R.drawable.bar_3_normal);
+		iv_buttom_4.setBackgroundResource(R.drawable.bar_4_normal);
+		iv_buttom_5.setBackgroundResource(R.drawable.bar_5_normal);
+		
+		switch (paramId) {
+		case IConstant.BUTTOM_1:
+			IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_1;
+			iv_buttom_1.setBackgroundResource(R.drawable.bar_1_selected);
+			break;
+		case IConstant.BUTTOM_2:
+			IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_2;
+			iv_buttom_2.setBackgroundResource(R.drawable.bar_2_selected);		
+			break;
+		case IConstant.BUTTOM_3:
+			IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_3;
+			iv_buttom_3.setBackgroundResource(R.drawable.bar_3_selected);
+			break;
+		case IConstant.BUTTOM_4:
+			IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_4;
+			iv_buttom_4.setBackgroundResource(R.drawable.bar_4_selected);
+			break;
+		case IConstant.BUTTOM_5:
+			IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_5;
+			iv_buttom_5.setBackgroundResource(R.drawable.bar_5_selected);
+			break;
+
+		default:
+			break;
+		}
+	}
+	
+	private class BaseClickListener implements OnClickListener{
+
+		@Override
+		public void onClick(View v) {
+			switch (v.getId()) {
+			case R.id.bt_head_left:
+				//TODO
+				break;
+			case R.id.bt_head_right:
+				//TODO
+				break;
+			case R.id.iv_fm_buttom_1:
+				if(IConstant.BUTTOM_DEFAULT == IConstant.BUTTOM_1)return;
+				startActivity(new Intent(BaseActivity.this,HomeActivity.class));
+				finish();
+				break;
+			case R.id.iv_fm_buttom_2:
+				if(IConstant.BUTTOM_DEFAULT == IConstant.BUTTOM_2)return;
+				startActivity(new Intent(BaseActivity.this,Class1Activity.class));
+				finish();
+				break;
+			case R.id.iv_fm_buttom_3:
+				if(IConstant.BUTTOM_DEFAULT == IConstant.BUTTOM_3)return;
+				startActivity(new Intent(BaseActivity.this,Class2Activity.class));
+				finish();
+				break;
+			case R.id.iv_fm_buttom_4:
+				if(IConstant.BUTTOM_DEFAULT == IConstant.BUTTOM_4)return;
+				startActivity(new Intent(BaseActivity.this,SearchActivity.class));
+				finish();
+				break;
+			case R.id.iv_fm_buttom_5:
+				if(IConstant.BUTTOM_DEFAULT == IConstant.BUTTOM_5)return;
+				startActivity(new Intent(BaseActivity.this,MoreActivity.class));
+				finish();
+				break;
+			default:
+				break;
+			}
+		}
+		
+	}
+
+	@Override
+	public void setContentView(int layoutResID) {
+		inflate = getLayoutInflater().inflate(layoutResID, null);
+		setContentView(inflate);
+	}
+
+	/**
+	 * 更新中部线性布局的视图
+	 * @param view
+	 */
+	public void setContentView(View view) {
+		ll_fm_content.removeAllViews();
+		ll_fm_content.addView(view);
+	}
+
+	@Override
+	public View findViewById(int id) {
+		return inflate.findViewById(id);
+	}
+	
+	/**
+	 * 加载视图
+	 */
+	public abstract void loadView();
+	/**
+	 * 查找控件
+	 */
+	public abstract void findViews();
+	/**
+	 * 设置监听器
+	 */
+	public abstract void setListener();
+	/**
+	 * 数据交互
+	 */
+	public abstract void progressLogic();
+	
+	/** 显示加载提示框 */
+	protected void showProgressDialog(){
+		if((!isFinishing()&&this.progressDialog == null)){
+			progressDialog = new ProgressDialog(this);
+		}
+		if(progressDialog.isShowing())return;
+		progressDialog.setTitle("正在加载");
+		progressDialog.setMessage("请稍候......");
+		progressDialog.show();
+	}
+	/** 关闭加载提示框 */
+	protected void closeProgressDialog(){
+		if(progressDialog != null)
+			progressDialog.dismiss();
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+	}
+	
+	class BaseHandler extends Handler{
+		private Context context;
+		private DataCallBack callBack;
+		
+		public BaseHandler(Context context, DataCallBack callBack) {
+			super();
+			this.context = context;
+			this.callBack = callBack;
+		}
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case IConstant.NETWORK_OK:
+				if(null == msg.obj){
+					DialogUtil.showDialog(context, "提示：", "数据错误", "确定");
+				}else{
+					callBack.progressData(msg.obj);
+				}
+				break;
+			case IConstant.NETWORK_FAILED:
+				
+				break;
+
+			default:
+				break;
+			}
+		}
+
+	}
+	
+	protected abstract interface DataCallBack<T>{
+		public abstract void progressData(T param);
+	}
+	
+	private Vector<BaseTask> record = new Vector<>();
+	class BaseTask implements Runnable{
+		private Context context;
+		private RequestVo requestVo;
+		private Handler handler;
+
+		public BaseTask(Context context, RequestVo requestVo, Handler handler) {
+			super();
+			this.context = context;
+			this.requestVo = requestVo;
+			this.handler = handler;
+		}
+
+		@Override
+		public void run() {
+			Object obj = null;
+			Message msg = Message.obtain();
+			try {
+				if(NetUtil.hasNetwork(context)){
+					obj = NetUtil.post(requestVo);
+					if(obj instanceof NetStatus){
+						Intent intent = new Intent(BaseActivity.this,LoginActivty.class);
+						intent.putExtra(IConstant.IK_BASE_LOGIN_NOT, "login_not");
+						startActivityForResult(intent, IConstant.REQUESTCODE_BASE_LOGIN_NOT);
+					}else{
+						msg.what = IConstant.NETWORK_OK;
+						msg.obj = obj;
+						handler.sendMessage(msg);
+						record.remove(this);
+					}
+				}else{
+					msg.what = IConstant.NETWORK_FAILED;
+					msg.obj = obj;
+					handler.sendMessage(msg);
+					record.remove(this);
+				}
+			} catch (Exception e) {
+				record.remove(this);
+				throw new RuntimeException(e);
+			}
+			
+		}
+		
+	}
+	/**
+	 * 从服务器端获取数据
+	 * @param requestVo
+	 * @param callback
+	 */
+	protected void getDataFromServer(RequestVo requestVo,DataCallBack callBack){
+		
+		BaseHandler handler = new BaseHandler(this, callBack);
+		BaseTask task = new BaseTask(this, requestVo, handler);
+		record.add(task);
+		poolManager.addTask(task);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(requestCode == IConstant.REQUESTCODE_BASE_LOGIN_NOT){
+			if(resultCode == IConstant.RESULTCODE_LOGIN_LOGIN_NOT){
+				int size = record.size();
+				for(int i=0; i<size; i++){
+					poolManager.addTask(record.get(0));
+				}
+			}else{
+				finish();
+			}
+		}
+	}
+	
+}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <ImageView
+        android:id="@+id/iv_wifi_nowifi"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/wifi_nowifi_img_discription"
+        android:src="@drawable/appwall_internet_disable" />
+
+    <TextView
+        android:id="@+id/tv_wifi_nowifi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textSize="12sp"
+        android:text="@string/wifi_nowifi_information" />
+
+    <Button
+        android:id="@+id/bt_wifi_nowifi_open"
+        style="@style/wifiButtonStyle"
+        android:layout_below="@+id/tv_wifi_nowifi"
+        android:background="@drawable/btn_add_accounts"
+        android:text="@string/wifi_nowifi_button_open" />
+    
+    <Button
+        android:id="@+id/bt_wifi_nowifi_cancle"
+        style="@style/wifiButtonStyle"
+        android:layout_below="@+id/bt_wifi_nowifi_open"
+        android:background="@drawable/btn_quick_register"
+        android:text="@string/wifi_nowifi_button_cancle" />
+    
+    <Button
+        android:id="@+id/bt_wifi_nowifi_close"
+        style="@style/wifiButtonStyle"
+        android:layout_below="@+id/tv_wifi_nowifi"
+        android:background="@drawable/btn_quick_register"
+        android:visibility="gone"
+        android:text="@string/wifi_nowifi_button_close" />
+
+</RelativeLayout>

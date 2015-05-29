@@ -1,0 +1,103 @@
+package com.e_road.ui;
+
+import java.util.HashMap;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.view.View;
+import android.widget.TextView;
+
+import com.e_road.R;
+import com.e_road.service.ERoadService;
+import com.e_road.service.ProtectedService;
+import com.e_road.utils.IConstant;
+import com.e_road.utils.LoggerUtil;
+import com.e_road.utils.parser.Class2Parser;
+import com.e_road.vo.RequestVo;
+import com.e_road.vo.UserInfo;
+
+public class Class2Activity extends BaseActivity {
+	private static String TAG = "Class2Activity";
+	private TextView tv_text;
+	private ERoadService mService;
+	private ServiceConnection mConnection;
+//	private ProtectedService pService;
+
+	@Override
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void loadView() {
+		setContentView(R.layout.class2);
+		selectedButtomTab(IConstant.BUTTOM_3);
+		bindService();
+		startService(new Intent(this,ProtectedService.class));
+	}
+
+	private void bindService() {
+
+		mConnection = new ServiceConnection() {
+
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+				mService = null;
+				LoggerUtil.d(TAG, "service解绑了");
+			}
+
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				LoggerUtil.d(TAG, "service绑定了");
+				mService = ((ERoadService.ERoadBinder) service).getService();
+			}
+		};
+
+		Intent intent = new Intent(Class2Activity.this, ERoadService.class);
+
+		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+	}
+
+	@Override
+	public void findViews() {
+		tv_text = (TextView) findViewById(R.id.tv_class2_text);
+	}
+
+	@Override
+	public void setListener() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void progressLogic() {
+		int requestUrl = R.string.url_userinfo;
+		HashMap<String, String> map = new HashMap<String, String>();
+		Class2Parser parser = new Class2Parser();
+		RequestVo requestVo = new RequestVo(requestUrl, this, map, parser);
+
+		getDataFromServer(requestVo, new DataCallBack<UserInfo>() {
+
+			@Override
+			public void progressData(UserInfo param) {
+				String nickname = param.getNickname();
+				tv_text.setText("欢迎  ：" + nickname);
+			}
+		});
+	}
+
+	@Override
+	protected void onDestroy() {
+		tv_text = null;
+		mService = null;
+		mService.unbindService(mConnection);
+		mConnection = null;
+		super.onDestroy();
+	}
+
+	
+}

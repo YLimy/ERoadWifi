@@ -1,0 +1,43 @@
+package com.e_road.utils.parser;
+
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
+import com.e_road.utils.IConstant;
+import com.e_road.vo.UserInfo;
+
+public class RegisterParser extends BaseParser<Object> {
+
+	/**
+	 * 解析注册结果<br>
+	 * 用户已存在 ：IConstant.REGISTER_EXIST<br>
+	 * 注册成功 ：IConstant.LOGIN 返回UserInfo对象<br>
+	 * 其他 ："注册异常"
+	 * 
+	 * @return IConstant.REGISTER_EXIST<br>
+	 *         UserInfo<br>
+	 *         "注册异常"
+	 */
+	@Override
+	public Object parseJson(String paramString) throws JSONException {
+		String result = checkResponse(paramString);
+		if (null != result) {
+			if (result.equals(IConstant.REGISTER_EXIST)) {
+				return IConstant.REGISTER_EXIST;
+			} else if (result.equals(IConstant.RESPONSE_SUCCESS)) {
+//				JSONObject jsonObj = JSONObject.parseObject(paramString);
+//				UserInfo userInfo = jsonObj.getObject("userinfo",
+//						UserInfo.class);
+				UserInfo userInfo = new UserInfo();
+				return userInfo;
+			}
+		}
+		return "注册失败";
+	}
+
+	@Override
+	public Object parseJson4App(String paramString) throws JSONException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

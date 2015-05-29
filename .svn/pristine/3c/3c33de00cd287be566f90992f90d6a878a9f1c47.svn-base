@@ -1,0 +1,118 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+    -->
+    <style name="AppBaseTheme" parent="Theme.AppCompat.Light">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+
+    <!-- Application theme. -->
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+    
+    <style name="style_15_EBEBEB_BOLD">
+        <item name="android:textSize">15.0sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#ffebebeb</item>
+    </style>
+    
+    <style name="style_18_EBEBEB_BOLD">
+        <item name="android:textSize">18.0sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#ffebebeb</item>
+    </style>
+    
+    <style name="CustomWindowTitleBackground">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+    
+    <style name="customListView" parent="@android:style/Widget.ListView">
+        <item name="android:scrollbarThumbVertical">@drawable/scrollbar_handle_vertical</item>
+        <item name="android:fadingEdge">none</item>
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+        <item name="android:listSelector">@drawable/home_itme_selector</item>
+    </style>
+    
+<!--     <style name="Default" parent="@android:style/Theme.Light.NoTitleBar"> -->
+    <style name="Default" parent="AppTheme">
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowTitleSize">40.0dip</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowNoTitle">false</item>
+<!--         <item name="windowActionBarOverlay">true</item> -->
+         <item name="android:listViewStyle">@style/customListView</item>  
+<!--         <item name="android:windowTitleBackgroundStyle">@style/CustomWindowTitleBackground</item> -->
+<!--         <item name="android:textColor">#00000000</item> -->
+        
+    </style>
+
+    <style name="Default.startTheme">
+        <item name="android:windowBackground">@drawable/introduce1</item>
+    </style>
+    
+    <!-- frament_main底部RadioButton样式 -->
+    <style name="BaseButtomRB">
+        <item name="android:button">@null</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:layout_weight">1.0</item>
+    </style>
+    
+    <!-- base_fragment_buttom样式 -->
+    <style name="BaseFragButtomTV">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+    
+    <!-- 登陆输入框 -->
+    <style name="accountInputBorder">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_marginLeft">18dp</item>
+        <item name="android:layout_marginRight">18dp</item>
+        <item name="android:background">@drawable/login_border</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+    <!-- 登陆输入框编辑 -->
+    <style name="accountEditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@color/white</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textColor">@color/grey</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+    <style name="buttonBarButtonStyle">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+    <!-- 继承 -->
+    <style name="accountButtonStyle" parent="@style/buttonBarButtonStyle">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    
+    <!-- WiFi -->
+    <style name="wifiButtonStyle">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_marginLeft">40dp</item>
+        <item name="android:layout_marginRight">40dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:layout_marginTop">12dp</item>
+    </style>
+    
+</resources>

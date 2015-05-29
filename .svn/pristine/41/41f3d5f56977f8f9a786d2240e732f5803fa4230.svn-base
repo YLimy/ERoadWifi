@@ -1,0 +1,642 @@
+package com.e_road.ui;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Vector;
+
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.TaskStackBuilder;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewConfiguration;
+import android.view.Window;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.Toast;
+
+import com.e_road.R;
+import com.e_road.application.ERoadApplication;
+import com.e_road.utils.CommonUtil;
+import com.e_road.utils.IConstant;
+import com.e_road.utils.LoggerUtil;
+import com.e_road.utils.NetUtil;
+import com.e_road.utils.NetUtil.NetStatus;
+import com.e_road.utils.ThreadPoolManager;
+import com.e_road.utils.parser.LogoutParser;
+import com.e_road.vo.RequestVo;
+
+/**
+ * 主界面的activity
+ * 
+ * @author CaiMeng
+ * 
+ */
+public abstract class BaseActivity extends Activity implements OnClickListener {
+
+	// /** 左上按钮 */
+	// private Button bt_left;
+	// /** 右上按钮 */
+	// private Button bt_right;
+
+	/** 下方图标01 */
+	private RadioButton iv_buttom_1;
+	/** 下方图标02 */
+	private RadioButton iv_buttom_2;
+	/** 下方图标03 */
+	private RadioButton iv_buttom_3;
+	/** 下方图标04 */
+	private RadioButton iv_buttom_4;
+	/** 下方图标05 */
+	private RadioButton iv_buttom_5;
+
+	/** 中部线性布局 */
+	private LinearLayout ll_fm_content;
+
+	/** 主界面的事件监听 */
+	private BaseClickListener baseClickListener;
+	/** 中部显示区的引用 */
+	private View inflate;
+	/** 页面加载提示框 */
+	protected ProgressDialog progressDialog;
+	/** 线程池 */
+	private ThreadPoolManager poolManager;
+
+	private ERoadApplication application;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		application = (ERoadApplication) getApplication();
+		application.addActivity(this);
+
+		// requestWindowFeature(Window.FEATURE_LEFT_ICON);
+
+		// requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+
+		super.setContentView(R.layout.frament_main);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+		// setFeatureDrawableResource(Window.FEATURE_LEFT_ICON,
+		// R.drawable.ic_launcher);
+
+		// 自定义标题栏
+		// getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
+		// R.layout.custom_title);
+
+		ActionBar actionBar = getActionBar();
+		// 添加图标导航
+		actionBar.setHomeButtonEnabled(true);
+		// 禁止物理menu
+		setOverflowShowingAlways();
+		// 启用anctionBar导航
+		actionBar.setDisplayHomeAsUpEnabled(true);
+
+		poolManager = ThreadPoolManager.getInstatnce();
+		baseClickListener = new BaseClickListener();
+
+		initContentView();
+
+	}
+
+	/**
+	 * 主界面初始化方法
+	 */
+	private void initContentView() {
+		findContentView();
+		// selectedButtomTab(IConstant.BUTTOM_1);
+
+		buttomRadioButtonChecked();
+
+		setContentListener();
+		initLayoutView();
+		progressContentLogic();
+	}
+
+	/**
+	 * 加载中间视图<br>
+	 * id为ll_fm_content的线性布局内容的填充
+	 */
+	private void initLayoutView() {
+		loadView();
+		findViews();
+		setListener();
+		progressLogic();
+	}
+
+	/**
+	 * 查找主界面控件
+	 */
+	private void findContentView() {
+		// bt_left = (Button) super.findViewById(R.id.bt_head_left);
+		// bt_right = (Button) super.findViewById(R.id.bt_head_right);
+
+		iv_buttom_1 = (RadioButton) super.findViewById(R.id.iv_fm_buttom_1);
+		iv_buttom_2 = (RadioButton) super.findViewById(R.id.iv_fm_buttom_2);
+		iv_buttom_3 = (RadioButton) super.findViewById(R.id.iv_fm_buttom_3);
+		iv_buttom_4 = (RadioButton) super.findViewById(R.id.iv_fm_buttom_4);
+		iv_buttom_5 = (RadioButton) super.findViewById(R.id.iv_fm_buttom_5);
+
+		ll_fm_content = (LinearLayout) super.findViewById(R.id.ll_fm_content);
+	}
+
+	/**
+	 * 添加主界面监听器
+	 */
+	private void setContentListener() {
+		// bt_left.setOnClickListener(baseClickListener);
+		// bt_right.setOnClickListener(baseClickListener);
+
+		iv_buttom_1.setOnClickListener(baseClickListener);
+		iv_buttom_2.setOnClickListener(baseClickListener);
+		iv_buttom_3.setOnClickListener(baseClickListener);
+		iv_buttom_4.setOnClickListener(baseClickListener);
+		iv_buttom_5.setOnClickListener(baseClickListener);
+	}
+
+	/**
+	 * 主界面与服务器交互
+	 */
+	private void progressContentLogic() {
+		switch (IConstant.BUTTOM_DEFAULT) {
+		case IConstant.BUTTOM_1:
+			iv_buttom_1.setChecked(true);
+			break;
+		case IConstant.BUTTOM_2:
+			iv_buttom_2.setChecked(true);
+			break;
+		case IConstant.BUTTOM_3:
+			iv_buttom_3.setChecked(true);
+			break;
+		case IConstant.BUTTOM_4:
+			iv_buttom_4.setChecked(true);
+			break;
+		case IConstant.BUTTOM_5:
+			iv_buttom_5.setChecked(true);
+			break;
+		}
+	}
+
+	/**
+	 * 点亮被点击的下方图标
+	 */
+	private void buttomRadioButtonChecked() {
+
+	}
+
+	// /**
+	// * 改变选定按钮图标的背景样式
+	// *
+	// * @param paramId
+	// * 按钮或图标在Constant中对应的标识值
+	// */
+	// protected void selectedButtomTab(int paramId) {
+	//
+	// iv_buttom_1.setBackgroundResource(R.drawable.bar_1_normal);
+	// iv_buttom_2.setBackgroundResource(R.drawable.bar_2_normal);
+	// iv_buttom_3.setBackgroundResource(R.drawable.bar_3_normal);
+	// iv_buttom_4.setBackgroundResource(R.drawable.bar_4_normal);
+	// iv_buttom_5.setBackgroundResource(R.drawable.bar_5_normal);
+	//
+	// switch (paramId) {
+	// case IConstant.BUTTOM_1:
+	// IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_1;
+	// iv_buttom_1.setBackgroundResource(R.drawable.bar_1_selected);
+	// break;
+	// case IConstant.BUTTOM_2:
+	// IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_2;
+	// iv_buttom_2.setBackgroundResource(R.drawable.bar_2_selected);
+	// break;
+	// case IConstant.BUTTOM_3:
+	// IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_3;
+	// iv_buttom_3.setBackgroundResource(R.drawable.bar_3_selected);
+	// break;
+	// case IConstant.BUTTOM_4:
+	// IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_4;
+	// iv_buttom_4.setBackgroundResource(R.drawable.bar_4_selected);
+	// break;
+	// case IConstant.BUTTOM_5:
+	// IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_5;
+	// iv_buttom_5.setBackgroundResource(R.drawable.bar_5_selected);
+	// break;
+	//
+	// default:
+	// break;
+	// }
+	// }
+
+	private class BaseClickListener implements OnClickListener {
+
+		@Override
+		public void onClick(View v) {
+			switch (v.getId()) {
+			case R.id.bt_head_left:
+				// TODO
+				break;
+			case R.id.bt_head_right:
+				// TODO
+				break;
+			case R.id.iv_fm_buttom_1:
+				if (IConstant.BUTTOM_DEFAULT == IConstant.BUTTOM_1)
+					return;
+				IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_1;
+				startActivity(new Intent(BaseActivity.this, HomeActivity.class));
+				finish();
+				break;
+			case R.id.iv_fm_buttom_2:
+				if (IConstant.BUTTOM_DEFAULT == IConstant.BUTTOM_2)
+					return;
+				IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_2;
+				startActivity(new Intent(BaseActivity.this,
+						Class1Activity.class));
+				finish();
+				break;
+			case R.id.iv_fm_buttom_3:
+				if (IConstant.BUTTOM_DEFAULT == IConstant.BUTTOM_3)
+					return;
+				IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_3;
+				startActivity(new Intent(BaseActivity.this,
+						Class2Activity.class));
+				finish();
+				break;
+			case R.id.iv_fm_buttom_4:
+				if (IConstant.BUTTOM_DEFAULT == IConstant.BUTTOM_4)
+					return;
+				IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_4;
+				startActivity(new Intent(BaseActivity.this,
+						SearchActivity.class));
+				finish();
+				break;
+			case R.id.iv_fm_buttom_5:
+				if (IConstant.BUTTOM_DEFAULT == IConstant.BUTTOM_5)
+					return;
+				IConstant.BUTTOM_DEFAULT = IConstant.BUTTOM_5;
+				startActivity(new Intent(BaseActivity.this, MoreActivity.class));
+				finish();
+				break;
+			}
+		}
+
+	}
+
+	@Override
+	public void setContentView(int layoutResID) {
+		getWindow().setBackgroundDrawableResource(android.R.color.white);
+		inflate = getLayoutInflater().inflate(layoutResID, null);
+		setContentView(inflate);
+	}
+
+	/**
+	 * 更新中部线性布局的视图
+	 * 
+	 * @param view
+	 */
+	public void setContentView(View view) {
+		ll_fm_content.removeAllViews();
+		ll_fm_content.addView(view);
+	}
+
+	@Override
+	public View findViewById(int id) {
+		return inflate.findViewById(id);
+	}
+
+	/**
+	 * 加载视图
+	 */
+	public abstract void loadView();
+
+	/**
+	 * 查找控件
+	 */
+	public abstract void findViews();
+
+	/**
+	 * 设置监听器
+	 */
+	public abstract void setListener();
+
+	/**
+	 * 数据交互
+	 */
+	public abstract void progressLogic();
+
+	/** 显示加载提示框 */
+	protected void showProgressDialog() {
+		if ((!isFinishing() && this.progressDialog == null)) {
+			progressDialog = new ProgressDialog(this);
+		}
+		if (progressDialog.isShowing())
+			return;
+		progressDialog.setTitle("正在加载");
+		progressDialog.setMessage("请稍候......");
+		progressDialog.show();
+	}
+
+	/** 关闭加载提示框 */
+	protected void closeProgressDialog() {
+		if (progressDialog != null)
+			progressDialog.dismiss();
+	}
+
+	@Override
+	protected void onDestroy() {
+		// bt_left = null;
+		// bt_right = null;
+		iv_buttom_1 = null;
+		iv_buttom_2 = null;
+		iv_buttom_3 = null;
+		iv_buttom_4 = null;
+		iv_buttom_5 = null;
+		ll_fm_content = null;
+		baseClickListener = null;
+		inflate = null;
+		poolManager = null;
+		record = null;
+		if (null != progressDialog) {
+			progressDialog.dismiss();
+			progressDialog = null;
+		}
+		super.onDestroy();
+	}
+
+	@SuppressLint("HandlerLeak")
+	class BaseHandler extends Handler {
+		private Context context;
+		@SuppressWarnings("rawtypes")
+		private DataCallBack callBack;
+
+		@SuppressWarnings("rawtypes")
+		public BaseHandler(Context context, DataCallBack callBack) {
+			super();
+			this.context = context;
+			this.callBack = callBack;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case IConstant.NETWORK_OK:
+				if (null == msg.obj) {
+					CommonUtil.showInfoDialog(context, "数据错误");
+				} else {
+					callBack.progressData(msg.obj);
+				}
+				break;
+			case IConstant.NETWORK_FAILED:
+
+				break;
+
+			default:
+				break;
+			}
+		}
+
+	}
+
+	protected abstract interface DataCallBack<T> {
+		public abstract void progressData(T param);
+	}
+
+	private Vector<BaseTask> record = new Vector<BaseTask>();
+
+	class BaseTask implements Runnable {
+		private Context context;
+		private RequestVo requestVo;
+		private Handler handler;
+
+		public BaseTask(Context context, RequestVo requestVo, Handler handler) {
+			super();
+			this.context = context;
+			this.requestVo = requestVo;
+			this.handler = handler;
+		}
+
+		@Override
+		public void run() {
+			Object obj = null;
+			Message msg = Message.obtain();
+			try {
+				if (NetUtil.hasNetwork(context)) {
+					obj = NetUtil.post(requestVo);
+					if (obj instanceof NetStatus) {
+						Intent intent = new Intent(BaseActivity.this,
+								LoginActivty.class);
+						intent.putExtra(IConstant.IK_BASE_LOGIN_NOT,
+								"login_not");
+						startActivityForResult(intent,
+								IConstant.REQUESTCODE_BASE_LOGIN_NOT);
+					} else {
+						msg.what = IConstant.NETWORK_OK;
+						msg.obj = obj;
+						handler.sendMessage(msg);
+						record.remove(this);
+					}
+				} else {
+					msg.what = IConstant.NETWORK_FAILED;
+					msg.obj = obj;
+					handler.sendMessage(msg);
+					record.remove(this);
+				}
+			} catch (Exception e) {
+				record.remove(this);
+				throw new RuntimeException(e);
+			}
+
+		}
+
+	}
+
+	/**
+	 * 从服务器端获取数据
+	 * 
+	 * @param requestVo
+	 * @param callback
+	 */
+	@SuppressWarnings("rawtypes")
+	protected void getDataFromServer(RequestVo requestVo, DataCallBack callBack) {
+
+		BaseHandler handler = new BaseHandler(this, callBack);
+		BaseTask task = new BaseTask(this, requestVo, handler);
+		record.add(task);
+		poolManager.addTask(task);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == IConstant.REQUESTCODE_BASE_LOGIN_NOT) {
+			if (resultCode == IConstant.RESULTCODE_LOGIN_LOGIN) {
+				LoggerUtil.d("BaseActivity", "接收到返回信息");
+				// 已登陆
+				int size = record.size();
+				for (int i = 0; i < size; i++) {
+					poolManager.addTask(record.get(0));
+				}
+			} else {
+				// finish();
+			}
+		}
+	}
+
+	/**
+	 * 创建菜单界面
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater menuInflater = getMenuInflater();
+		menuInflater.inflate(R.menu.main, menu);
+		// MenuItem menuItem = menu.findItem(R.id.action_search);
+		// SearchView searchView = (SearchView) menuItem.getActionView();
+		// // TODO 操作searchView
+		// MenuItem addMenu = menu.findItem(R.id.action_add);
+		// AddActionProvider addProvider = (AddActionProvider)
+		// addMenu.getActionProvider();
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	/**
+	 * 菜单点击事项
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.home:
+			// actionBar的home键
+			// 获取父activity
+			Intent upIntent = NavUtils.getParentActivityIntent(this);
+			// 判断是否能移动到栈顶
+			if (NavUtils.shouldUpRecreateTask(this, upIntent)) {
+				TaskStackBuilder.create(this)
+						.addNextIntentWithParentStack(upIntent)
+						.startActivities();
+			} else {
+				upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				NavUtils.navigateUpTo(this, upIntent);
+			}
+			return true;
+		case R.id.action_add:
+
+			// 添加
+			return true;
+			// case R.id.action_search:
+			//
+			// return true;
+		case R.id.action_overflow_settings:
+
+			// 设置
+			Intent intent = new Intent(
+					android.provider.Settings.ACTION_WIRELESS_SETTINGS);
+			startActivity(intent);
+			return true;
+
+		case R.id.action_overflow_login:
+
+			// 登录
+			startActivity(new Intent(this, LoginActivty.class));
+
+			return true;
+		case R.id.action_overflow_logout:
+
+			// 注销
+			baseLogout();
+
+			return true;
+		case R.id.action_overflow_exit:
+
+			// 退出
+			application.exit();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	/**
+	 * 注销
+	 * 
+	 */
+	protected void baseLogout() {
+
+		// 未登录用户不处理
+		if (!CommonUtil.isLogin(this))
+			return;
+
+		// TODO 已登录界面信息的刷新
+
+		RequestVo requestVo = new RequestVo(R.string.url_logout, this, null,
+				new LogoutParser());
+		getDataFromServer(requestVo, new DataCallBack<String>() {
+
+			@Override
+			public void progressData(String param) {
+
+				// 清空SharedPreferences中的登录用户信息
+				CommonUtil.saveSharedPreferences(BaseActivity.this, "sp",
+						IConstant.LOGIN_USER_NAME, "");
+
+				Toast.makeText(BaseActivity.this, "注销成功", Toast.LENGTH_SHORT)
+						.show();
+
+				onResume();
+			}
+
+		});
+
+	}
+
+	/**
+	 * 为了overflow显示一致<br>
+	 * 当存在物理menu时<br>
+	 * 禁用其对本程序的操作。
+	 */
+	private void setOverflowShowingAlways() {
+		try {
+			ViewConfiguration config = ViewConfiguration.get(this);
+			Field menuKeyField = ViewConfiguration.class
+					.getDeclaredField("sHasPermanentMenuKey");
+			menuKeyField.setAccessible(true);
+			menuKeyField.setBoolean(config, false);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 重写menuOpen方法<br>
+	 * 使menu中显示图片<br>
+	 * 默认：<br>
+	 * actionBar中不显示文本，overflow中不显示图片
+	 */
+	@Override
+	public boolean onMenuOpened(int featureId, Menu menu) {
+		if (featureId == Window.FEATURE_ACTION_BAR && menu != null) {
+			if (menu.getClass().getSimpleName().equals("MenuBuilder")) {
+				try {
+					Method m = menu.getClass().getDeclaredMethod(
+							"s" + "etOptionalIconsVisible", Boolean.TYPE);
+					m.setAccessible(true);
+					m.invoke(menu, true);
+				} catch (Exception e) {
+				}
+			}
+		}
+		return super.onMenuOpened(featureId, menu);
+	}
+
+	
+
+}

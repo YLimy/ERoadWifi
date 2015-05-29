@@ -1,0 +1,37 @@
+package com.e_road.utils.parser;
+
+import java.util.Map;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import com.e_road.utils.IConstant;
+import com.e_road.vo.UserInfo;
+
+public class LoginParser extends BaseParser<Object> {
+
+	/**
+	 * @return 登陆成功:[UserInfo]<br>
+	 *         登陆失败:IConstant.LOGIN_ERRO<br>
+	 *         服务器错误:null
+	 */
+	@Override
+	public Object parseJson(String paramString) throws JSONException {
+		String responseStr = checkResponse(paramString);
+		if (null != responseStr) {
+			if (responseStr == IConstant.LOGIN_ERRO) {
+				return IConstant.LOGIN_ERRO;
+			} else {
+				JSONObject jsonObj = new JSONObject(paramString);
+				String jsonStr = jsonObj.optString("userinfo");
+				UserInfo userInfo = JSON.parseObject(jsonStr, UserInfo.class);
+				return userInfo;
+			}
+		}
+		return responseStr;
+	}
+
+}

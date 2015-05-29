@@ -1,0 +1,329 @@
+package com.e_road.utils;
+
+import java.util.List;
+
+import android.content.Context;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.WifiLock;
+
+/**
+ * WiFi工具类
+ * 
+ * @author CaiMeng
+ * 
+ */
+public class WifiUtil {
+
+	/** WiFi manager */
+	private WifiManager wifiManager;
+	/** WiFi 信息 */
+	private WifiInfo wifiInfo;
+	/** 扫描出的网络连接列表 */
+	private List<ScanResult> results;
+	/** 网络连接列表 */
+	private List<WifiConfiguration> configurations;
+	/** WiFi锁，能够阻止WiFi进入睡眠状态，处于一直活跃状态 */
+	private WifiLock wifiLock;
+
+	/**
+	 * 定义几种加密方式：<br>
+	 * NOPASS(没有密码)<br>
+	 * WEP<br>
+	 * WPA
+	 * 
+	 * @author CaiMeng
+	 * 
+	 */
+	public enum WifiCipherType {
+		NOPASS, WEP, WPA_PSK, WPA2
+	}
+
+	public WifiUtil(Context context) {
+		wifiManager = (WifiManager) context
+				.getSystemService(Context.WIFI_SERVICE);
+		wifiInfo = wifiManager.getConnectionInfo();
+	}
+
+	/**
+	 * 打开WiFi
+	 */
+	public void openWifi() {
+		if (!wifiManager.isWifiEnabled()) {
+			wifiManager.setWifiEnabled(true);
+		}
+	}
+
+	/**
+	 * 关闭WiFi
+	 */
+	public void closeWifi() {
+		if (wifiManager.isWifiEnabled()) {
+			wifiManager.setWifiEnabled(false);
+		}
+	}
+
+	/**
+	 * 创建一个WiFi锁<br>
+	 * tag: mWiFi
+	 */
+	public void createWifiLock() {
+		wifiLock = wifiManager.createWifiLock("mWiFi");
+	}
+
+	/**
+	 * 锁定WiFi
+	 */
+	public void acquireWifiLock() {
+		if (null != wifiLock) {
+			wifiLock.acquire();
+		}
+	}
+
+	/**
+	 * 解锁WiFi
+	 */
+	public void releaseWifiLock() {
+		if (null != wifiLock && wifiLock.isHeld()) {
+			wifiLock.release();
+		}
+	}
+
+	/**
+	 * 指定配置好的网络进行连接
+	 * 
+	 * @param index
+	 */
+	public void connectConfiguration(int index) {
+		// 索引大于配置好的网络索引->返回
+		if (index > configurations.size()) {
+			return;
+		}
+		// 连接配置好的指定ID的网络
+		wifiManager.enableNetwork(configurations.get(index).networkId, true);
+	}
+
+	/**
+	 * 扫描网络连接
+	 */
+	public List<ScanResult> startScan() {
+		// 扫描网络连接
+		wifiManager.startScan();
+		// 获取扫描结果
+		results = wifiManager.getScanResults();
+		// 得到配置好的网络连接
+		configurations = wifiManager.getConfiguredNetworks();
+
+		return results;
+	}
+
+	/**
+	 * 查看扫描结果<br>
+	 * 方法调用前需调用startScan()方法扫描网络连接
+	 * 
+	 * @return index 序号<br>
+	 *         SSID ：局域网名<br>
+	 *         BSSID ：Basic Service Set 组群<br>
+	 *         capabilities ：支持的加密方式<br>
+	 *         level ： 信号强度 （损耗值） 数值越大，损耗越大，信号强度越低<br>
+	 *         frequency ：频率<br>
+	 */
+	public StringBuilder lookUpScan() {
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < results.size(); i++) {
+			builder.append("Indext_" + Integer.valueOf(i + 1).toString() + ":");
+			// 将ScanResult信息转换成一个字符包
+			// 其中包括：BSSID/SSID/capabilities/frequency/level
+			builder.append(results.get(i).toString());
+			builder.append("/n");
+		}
+		return builder;
+	}
+
+	/**
+	 * 获取MAC地址
+	 * 
+	 * @return
+	 */
+	public String getMacAddress() {
+		return (wifiInfo == null) ? "NULL" : wifiInfo.getMacAddress();
+	}
+
+	/**
+	 * 获取已连接的SSID
+	 * 
+	 * @return
+	 */
+	public String getSSID() {
+		return (wifiInfo == null) ? "NULL" : wifiInfo.getSSID();
+	}
+
+	/**
+	 * 获取BSSID
+	 * 
+	 * @return
+	 */
+	public String getBSSID() {
+		return (wifiInfo == null) ? "NULL" : wifiInfo.getBSSID();
+	}
+
+	/**
+	 * 获取IP地址
+	 * 
+	 * @return
+	 */
+	public int getIPAddress() {
+		return (wifiInfo == null) ? 0 : wifiInfo.getIpAddress();
+	}
+
+	/**
+	 * 获取连接ID
+	 * 
+	 * @return
+	 */
+	public int getNetworkId() {
+		return (wifiInfo == null) ? 0 : wifiInfo.getNetworkId();
+	}
+
+	/**
+	 * 添加一个网络并连接
+	 * 
+	 * @param wcfg
+	 */
+	public boolean addNetwork(WifiConfiguration wcfg) {
+		// 如果WiFi没有开启
+		if (!wifiManager.isWifiEnabled()) {
+			// 如果WiFi不能开启
+			if (!wifiManager.setWifiEnabled(true)) {
+				return false;
+			}
+			;
+		}
+		int wcfgID = wifiManager.addNetwork(wcfg);
+		return wifiManager.enableNetwork(wcfgID, true);
+	}
+
+	/**
+	 * 断开指定的网络连接
+	 * 
+	 * @param netID
+	 */
+	public void disconnectWifi(int netID) {
+		wifiManager.disableNetwork(netID);
+		wifiManager.disconnect();
+	}
+
+	/**
+	 * 断开所有连接
+	 */
+	public void disconnectAllWifi() {
+		wifiManager.disconnect();
+	}
+
+	/**
+	 * 创建一个WiFi连接信息
+	 * 
+	 * @param SSID
+	 * @param pwd
+	 * @param type
+	 * @return
+	 */
+	public WifiConfiguration CreateWifiInfo(String SSID, String pwd,
+			WifiCipherType type) {
+		WifiConfiguration configuration = new WifiConfiguration();
+
+		configuration.allowedAuthAlgorithms.clear();
+		configuration.allowedGroupCiphers.clear();
+		configuration.allowedKeyManagement.clear();
+		configuration.allowedPairwiseCiphers.clear();
+		configuration.allowedProtocols.clear();
+		configuration.SSID = "\"" + SSID + "\"";
+
+		// 如果已经存在SSID的连接，则去掉
+		WifiConfiguration tempConfig = isExists(SSID);
+		if (tempConfig != null) {
+			wifiManager.removeNetwork(tempConfig.networkId);
+		}
+		// 根据加密状态返回WifiConfiguration
+		if (WifiCipherType.NOPASS == type) {
+			return nopassWifiConfigration(configuration);
+		} else if (WifiCipherType.WEP == type) {
+			return wepWifiConfigration(configuration, pwd);
+		} else if (WifiCipherType.WPA_PSK == type) {
+			return wpaWifiConfigration(configuration, pwd);
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * WEP加密连接WiFi
+	 */
+	private WifiConfiguration wepWifiConfigration(WifiConfiguration config,
+			String pwd) {
+		config.hiddenSSID = true;
+		config.wepKeys[0] = "\"" + pwd + "\"";
+		config.allowedAuthAlgorithms
+				.set(WifiConfiguration.AuthAlgorithm.SHARED);
+		config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+		config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+		config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+		config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+		config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+		config.wepTxKeyIndex = 0;
+		return config;
+	}
+
+	/**
+	 * WPA_PSK加密连接WiFi
+	 */
+	private WifiConfiguration wpaWifiConfigration(WifiConfiguration config,
+			String pwd) {
+		config.hiddenSSID = true;
+		config.preSharedKey = "\"" + pwd + "\"";
+		config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+		config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+		config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+		config.allowedPairwiseCiphers
+				.set(WifiConfiguration.PairwiseCipher.TKIP);
+		// config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+		config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+		config.allowedPairwiseCiphers
+				.set(WifiConfiguration.PairwiseCipher.CCMP);
+		config.status = WifiConfiguration.Status.ENABLED;
+		return config;
+	}
+
+	/**
+	 * 没有密码连接WiFi
+	 */
+	private WifiConfiguration nopassWifiConfigration(WifiConfiguration config) {
+
+		// config.wepKeys[0] = "";
+		// config.wepTxKeyIndex = 0;
+		/*
+		 * 上面这两句代码会导致：WiFi在无密码时不能连接，在小米/华为上不能连接，在HTC上可以连接；
+		 */
+		config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+		return config;
+	}
+
+	/**
+	 * 指定SSID是否已经存在
+	 * 
+	 * @param SSID
+	 * @return
+	 */
+	private WifiConfiguration isExists(String SSID) {
+		List<WifiConfiguration> existConfigs = wifiManager
+				.getConfiguredNetworks();
+		for (WifiConfiguration existConfig : existConfigs) {
+			if (existConfig.SSID.equals("\"" + SSID + "\"")) {
+				return existConfig;
+			}
+		}
+		return null;
+	}
+}

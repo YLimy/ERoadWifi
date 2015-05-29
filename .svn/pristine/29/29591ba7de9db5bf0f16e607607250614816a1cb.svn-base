@@ -1,0 +1,53 @@
+package com.e_road.test;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+
+import com.e_road.R;
+import com.e_road.view.dialog.ButtomDialog;
+import com.e_road.view.dialog.ButtomDialog.ButtonCallBack;
+
+public class TestLayout extends Activity implements OnClickListener{
+	private Button bt_dialog;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.test_activity);
+		findViews();
+		setLinstener();
+	}
+
+	private void findViews() {
+		bt_dialog = (Button) findViewById(R.id.bt_test_01);
+	}
+
+	private void setLinstener() {
+		bt_dialog.setOnClickListener(this);
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.bt_test_01:
+			ButtomDialog dialog = new ButtomDialog(this);
+			
+			dialog.addOptionButton("取消",new ButtonCallBack() {
+				
+				@Override
+				public void callBack() {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+			dialog.show();
+			break;
+		}
+	}
+
+	
+}

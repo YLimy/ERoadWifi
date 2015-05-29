@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+          本地的三种标识方法：
+    localhost;
+    127.0.0.1;
+    10.0.2.2;(android的内置ip)
+    -->
+    <!-- <string name="url_host">http://10.0.2.2:8080/zjhnAppServer/</string> -->
+    <string name="url_host">http://192.168.10.89:8080/zjhnAppServer/</string>
+    <string name="url_version">Version/findVersion</string>
+    <string name="url_login">User/login</string>
+    <string name="url_logout">User/logout</string>
+    <string name="url_regist">User/add</string>
+    <string name="url_userinfo">userinfo</string>
+    <string name="url_home">http://www.9797168.com/mobile/index.html</string>
+    <string name="url_localservice">http://www.9797168.com/mobile/movie.html</string>
+    <string name="url_apps">http://www.9797168.com/mobile/app-choice.html</string>
+
+</resources>

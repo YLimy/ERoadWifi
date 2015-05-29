@@ -1,0 +1,117 @@
+package com.e_road.listener;
+
+import java.io.File;
+
+import android.content.Context;
+import android.os.Environment;
+import android.view.Gravity;
+import android.webkit.DownloadListener;
+import android.widget.Toast;
+
+import com.e_road.application.ERoadApplication;
+import com.e_road.download.DownLoadTask;
+import com.e_road.download.DownLoadTask.DownlaodListener;
+import com.e_road.thread.ThreadPoolManager;
+import com.e_road.utils.FileTypeUtil;
+import com.e_road.utils.FileTypeUtil.FileType;
+import com.e_road.utils.LoggerUtil;
+
+public class WebViewListener implements DownloadListener {
+	private static final String TAG = "WebViewListener";
+	private Context context;
+	private FileType fileType;
+	private DownLoadTask downLoadTask;
+
+	public WebViewListener(Context context) {
+		this.context = context;
+	}
+
+	@Override
+	public void onDownloadStart(String url, String userAgent,
+			String contentDisposition, String mimetype, long contentLength) {
+		// TODO Auto-generated method stub
+		LoggerUtil.d(TAG, "mimetype==>" + mimetype);
+		fileType = FileTypeUtil.getMIMEType(url);
+		showItem(url, fileType);
+	}
+
+	/**
+	 * 根据不同的类型展示不同的对话框或不展示
+	 * 
+	 * @param fileType 文件类型
+	 */
+	public void showItem(String url, FileType fileType) {
+		switch (fileType) {
+		case apk:
+			downFile(url);
+			break;
+		case video:
+
+			break;
+		case audio:
+
+			break;
+
+		case image:
+
+			break;
+		case pdf:
+
+			break;
+
+		case others:
+
+			break;
+		}
+	};
+	
+	private void downFile(String url){
+		if(checkSDCard()){
+			LoggerUtil.d(TAG, "下载地址为：" + url);
+			File file = new File(ERoadApplication.getCachPath(),subUrlFroName(url));
+			downLoadTask = new DownLoadTask(url,file.getAbsolutePath(), 5);
+			downLoadTask.setListener(new DownlaodListener() {
+				
+				@Override
+				public void update(int total, int len, int threadid) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void downLoadFinish(int totalSucess) {
+					LoggerUtil.d(TAG, "下载完成");
+					
+				}
+				
+				@Override
+				public void downLoadError(int type) {
+					LoggerUtil.d(TAG, "下载失败");
+					Toast.makeText(context, "下载失败", Toast.LENGTH_SHORT).show();
+					
+				}
+			});
+			ThreadPoolManager.getInstatnce().addTask(downLoadTask);
+			Toast.makeText(context, "开始下载", Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	private boolean checkSDCard(){
+		if(!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){  
+            Toast t = Toast.makeText(context, "需要SD卡。", Toast.LENGTH_LONG);  
+            t.setGravity(Gravity.CENTER, 0, 0);  
+            t.show();  
+            return false;  
+        }
+		return true;
+	}
+	
+	/**
+	 * 截取下载的文件名
+	 * @param url
+	 * @return
+	 */
+	private String subUrlFroName(String url){
+		return url.substring(url.lastIndexOf("/") + 1, url.length());
+	}
+}

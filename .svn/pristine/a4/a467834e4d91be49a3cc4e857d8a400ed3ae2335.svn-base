@@ -1,0 +1,12 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <title>404ERROR</title>
+    <link rel="stylesheet" href="./404notfound.css" type="text/css">
+</head>
+
+<body>
+<div class="notFound">
+	<div>前方在施工，回到<a id="addr" hidfocus="true" href="http://www.9797168.com">首页</a></div>
+</div>
+</body></html>

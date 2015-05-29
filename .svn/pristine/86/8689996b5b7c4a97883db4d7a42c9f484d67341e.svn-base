@@ -1,0 +1,39 @@
+package com.e_road.view.dialog;
+
+import android.content.Context;
+import android.view.View;
+import android.widget.Button;
+
+
+public class ButtomDialog extends BaseButtomDialog{
+
+	public ButtomDialog(Context context) {
+		super(context);
+		// TODO Auto-generated constructor stub
+	}
+
+	/**
+	 * 添加功能按钮
+	 * @param msg
+	 * @param callback
+	 */
+	public void addOptionButton(String msg, final ButtonCallBack callback){
+		
+		Button bt_cancle = new Button(context);
+		bt_cancle.setText(msg);
+		bt_cancle.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				callback.callBack();
+				dismiss();
+			}
+		});
+		
+		list_bt.add(bt_cancle);
+	}
+	
+	public interface ButtonCallBack{
+		public abstract void callBack();
+	}
+}

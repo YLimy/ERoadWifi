@@ -1,0 +1,55 @@
+package com.e_road.ui;
+
+import java.util.List;
+
+import com.e_road.adapter.InstalledAppAdapter;
+import com.e_road.utils.AppUtil;
+import com.e_road.utils.IConstant;
+import com.e_road.vo.AppInfo;
+import com.e_road.R;
+
+import android.content.Context;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.TextView;
+
+public class SearchActivity extends BaseActivity {
+	private TextView tv_text;
+	private ListView lv_search;
+
+	@Override
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void loadView() {
+		setContentView(R.layout.search);
+		selectedButtomTab(IConstant.BUTTOM_4);
+	}
+
+	@Override
+	public void findViews() {
+		tv_text = (TextView) findViewById(R.id.tv_search_text);
+		lv_search = (ListView) findViewById(R.id.lv_search);
+	}
+
+	@Override
+	public void setListener() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void progressLogic() {
+		if(AppUtil.isInstalled(this, "com.e_road")){
+			tv_text.setText("已经安装了e路网");
+		}else{
+			tv_text.setText("没有安装e路网");
+		}
+		List<AppInfo> list_app = AppUtil.showInstalledApp(this);
+		lv_search.setAdapter(new InstalledAppAdapter(this, list_app));
+	}
+
+}

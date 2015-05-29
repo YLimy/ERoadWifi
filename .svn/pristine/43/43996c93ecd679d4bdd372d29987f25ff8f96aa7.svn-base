@@ -1,0 +1,39 @@
+package com.e_road.ui;
+
+import android.view.View;
+
+import com.e_road.R;
+
+public class MoreActivity extends BaseActivity {
+
+	@Override
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void loadView() {
+		setContentView(R.layout.more);
+//		selectedButtomTab(IConstant.BUTTOM_5);
+	}
+
+	@Override
+	public void findViews() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setListener() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void progressLogic() {
+		// TODO Auto-generated method stub
+
+	}
+
+}

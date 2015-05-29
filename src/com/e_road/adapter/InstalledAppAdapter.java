@@ -1,0 +1,90 @@
+package com.e_road.adapter;
+
+import java.util.List;
+
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.e_road.R;
+import com.e_road.utils.DrawableUtil;
+import com.e_road.vo.AppInfo;
+
+/**
+ * 已经安装的应用adapter
+ * @author CaiMeng
+ *
+ */
+public class InstalledAppAdapter extends BaseAdapter{
+	private List<AppInfo> list;
+	private LayoutInflater inflate;
+	private Drawable[] drawables;
+	
+	public InstalledAppAdapter(Context context, List<AppInfo> list){
+		this.list = list;
+		inflate = LayoutInflater.from(context);
+		drawables = new Drawable[getCount()];
+	}
+
+	@Override
+	public int getCount() {
+		return list.size();
+	}
+
+	@Override
+	public Object getItem(int position) {
+		if(null != list && position<list.size()){
+			return list.get(position);
+		}else{
+			return null;
+		}
+		
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return position;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		
+		View view = null;
+		Holder holder = null;
+		
+		if(null != convertView){
+			view = convertView;
+			holder = (Holder) view.getTag(R.layout.adapter_installed);
+			
+		}else{
+			view = inflate.inflate(R.layout.adapter_installed, null);
+			holder = new Holder();
+			holder.iv = (ImageView) view.findViewById(R.id.iv_adapter_installed);
+			holder.tv = (TextView) view.findViewById(R.id.tv_adapter_installed);
+			view.setTag(R.layout.adapter_installed, holder);
+		}
+		
+		Drawable d = drawables[position];
+		if(null == d){
+			d = DrawableUtil.zoomDrawable(
+					list.get(position).getAppIcon(), 50, 50);
+			drawables[position] = d;
+		}
+		
+		holder.tv.setText(list.get(position).getAppName()+list.get(position).getVersionCode());
+		//兼容4.0版本
+		holder.iv.setBackgroundDrawable(d);
+		
+		return view;
+	}
+
+	private class Holder{
+		ImageView iv;
+		TextView tv;
+	}
+}

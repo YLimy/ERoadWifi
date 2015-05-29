@@ -1,0 +1,36 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.e_road.ui.BaseActivity" >
+
+    <item android:id="@+id/action_search"
+        android:icon="@drawable/actionbar_search_icon"
+        android:actionViewClass="android.widget.SearchView"
+        android:showAsAction="always"
+        android:title="搜索"/>
+    
+    <item android:id="@+id/action_add"
+        android:icon="@drawable/actionbar_add_icon"
+        android:showAsAction="always"
+        android:title="添加"/>
+    
+    
+    <item android:id="@+id/action_overflow_login"
+        android:icon="@drawable/ofm_add_icon"
+        android:title="登录"
+        android:showAsAction="never"/>
+    <item android:id="@+id/action_overflow_02"
+        android:icon="@drawable/ofm_photo_icon"
+        android:title="注销"
+        android:showAsAction="never"/>
+    <item android:id="@+id/action_overflow_03"
+        android:icon="@drawable/ofm_collect_icon"
+        android:title="overflow_03"
+        android:showAsAction="never"/>
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ofm_setting_icon"
+        android:title="@string/action_settings"
+        app:showAsAction="never"/>
+    
+</menu>

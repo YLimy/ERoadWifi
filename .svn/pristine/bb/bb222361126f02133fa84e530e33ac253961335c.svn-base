@@ -1,0 +1,48 @@
+package com.e_road.utils;
+
+public class IConstant {
+	
+	/** 主界面下方按钮默认选定值 */
+	public static int BUTTOM_DEFAULT = 0;
+	/** 主界面下方按钮选定值1 */
+	public static final int BUTTOM_1 = 1;
+	/** 主界面下方按钮选定值2 */
+	public static final int BUTTOM_2 = 2;
+	/** 主界面下方按钮选定值3 */
+	public static final int BUTTOM_3 = 3;
+	/** 主界面下方按钮选定值4 */
+	public static final int BUTTOM_4 = 4;
+	/** 主界面下方按钮选定值5 */
+	public static final int BUTTOM_5 = 5;
+	
+	/** 相应标识符 */
+	public static final String RESPONSE = "response";
+	/** 已登陆状态 */
+	public static final String LOGIN = "login";
+	/** 登陆错误 */
+	public static final String LOGIN_ERRO = "login_erro";
+	/** 需要验证登陆时处于未登陆状态 */
+	public static final String LOGIN_OUT = "login_out";
+	/** 无需登录 */
+	public static final String LOGIN_NOT = "login_not";
+	/** 用户已存在 */
+	public static final String REGISTER_EXIST = "register_exist";
+	/** 服务器数据异常 */
+	public static final String RESPONSE_ERRO = "response_erro";
+	
+	/** 未连接网络 */
+	public static final int NETWORK_FAILED = 0;
+	/** 网络正常 */
+	public static final int NETWORK_OK = 1;
+	
+	/** 请求码login_not=403 */
+	public static final int REQUESTCODE_BASE_LOGIN_NOT = 403;
+	/** key:login_not */
+	public static final String IK_BASE_LOGIN_NOT = "login_not";
+	/** 返回码login_not=4031 */
+	public static final int RESULTCODE_LOGIN_LOGIN = 4031;
+	
+	/** SharedPreferences中储存已登录用户的标识 */
+	public static final String LOGIN_USER = "user";
+
+}

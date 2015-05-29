@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vp_content_viewpager_frag_main"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/white"
+        android:layout_above="@+id/ll_content_viewpager_frag_buttom" />
+    
+    <ImageView 
+        android:id="@+id/iv_content_viewpager_frag_scroll_line"
+        android:layout_width="60dp"
+        android:layout_height="3dp"
+        android:layout_above="@+id/ll_content_viewpager_frag_buttom"
+        android:contentDescription="@string/description"
+        android:background="@drawable/tab_line_green"/>
+
+    <LinearLayout
+        android:id="@+id/ll_content_viewpager_frag_buttom"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#eeeeeeee" >
+		<!-- 首页 -->
+        <TextView
+            android:id="@+id/tv_content_viewpager_frag_buttom_home"
+            style="@style/BaseFragButtomTV"
+            android:drawableLeft="@drawable/menu_buttom_home"
+            android:textColor="@color/light_green"
+            android:text="@string/menu_buttom_home" />
+
+        <ImageView
+            android:layout_width="1.0dip"
+            android:layout_height="fill_parent"
+            android:contentDescription="@string/description"
+            android:src="@drawable/bottom_menu_line" />
+		<!-- 服务 -->
+        <TextView
+            android:id="@+id/tv_content_viewpager_frag_buttom_service"
+            style="@style/BaseFragButtomTV"
+            android:drawableLeft="@drawable/menu_buttom_service"
+            android:text="@string/menu_buttom_service" />
+
+        <ImageView
+            android:layout_width="1.0dip"
+            android:layout_height="fill_parent"
+            android:contentDescription="@string/description"
+            android:src="@drawable/bottom_menu_line" />
+		<!-- wifi -->
+<!--         <TextView -->
+<!--             android:id="@+id/tv_content_viewpager_frag_buttom_wifi" -->
+<!--             style="@style/BaseFragButtomTV" -->
+<!--             android:drawableLeft="@drawable/menu_buttom_wifi" -->
+<!--             android:text="@string/menu_buttom_wifi" /> -->
+
+<!--         <ImageView -->
+<!--             android:layout_width="1.0dip" -->
+<!--             android:layout_height="fill_parent" -->
+<!--             android:contentDescription="@string/description" -->
+<!--             android:src="@drawable/bottom_menu_line" /> -->
+		<!-- 应用 -->
+        <TextView
+            android:id="@+id/tv_content_viewpager_frag_buttom_apps"
+            style="@style/BaseFragButtomTV"
+            android:drawableLeft="@drawable/menu_buttom_apps"
+            android:text="@string/menu_buttom_apps" />
+
+        <ImageView
+            android:layout_width="1.0dip"
+            android:layout_height="fill_parent"
+            android:contentDescription="@string/description"
+            android:src="@drawable/bottom_menu_line" />
+		<!-- 我的 -->
+        <TextView
+            android:id="@+id/tv_content_viewpager_frag_buttom_mine"
+            style="@style/BaseFragButtomTV"
+            android:drawableLeft="@drawable/menu_buttom_mine"
+            android:text="@string/menu_buttom_mine" />
+    </LinearLayout>
+    
+    <ImageView 
+        android:id="@+id/iv_content_vp_scroll"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:background="@drawable/menu_redownload"
+        android:clickable="true"
+        android:layout_centerInParent="true"
+        android:layout_above="@+id/ll_content_viewpager_frag_buttom"/>
+
+</RelativeLayout>

@@ -1,0 +1,369 @@
+package com.e_road.ui.fragment;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.text.InputType;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.e_road.R;
+import com.e_road.utils.CommonUtil;
+import com.e_road.utils.IConstant;
+import com.e_road.utils.Interactive;
+import com.e_road.utils.parser.LoginParser;
+import com.e_road.utils.parser.RegisterParser;
+import com.e_road.vo.RequestVo;
+import com.e_road.vo.UserInfo;
+
+/**
+ * 用户登录界面
+ * 
+ * @author CaiMeng
+ * 
+ */
+public class LoginFragment extends Fragment implements OnClickListener {
+
+	/** 判断是否其他页面跳转而来 */
+	private boolean isLoginNot = false;
+
+	private EditText et_username;
+	private EditText et_password;
+	private EditText et_nickname;
+
+	private TextView tv_title;
+	private TextView tv_forget;
+	private TextView tv_msg;
+
+	private Button bt_show;
+	private Button bt_login;
+	private Button bt_regist;
+
+	/** 是否显示昵称 */
+	private boolean flag = true;
+
+	/** 与服务器交互的对象 */
+	private Interactive interactive;
+	private int passwordType;
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.login_fragment, container, false);
+		findViews(view);
+		init();
+		setListener();
+		return view;
+	}
+
+	private void findViews(View view) {
+		tv_title = (TextView) view.findViewById(R.id.tv_login_frag_title);
+		et_username = (EditText) view.findViewById(R.id.et_login_frag_user);
+		et_password = (EditText) view.findViewById(R.id.et_login_frag_password);
+		et_nickname = (EditText) view.findViewById(R.id.et_login_frag_nickname);
+		tv_forget = (TextView) view
+				.findViewById(R.id.tv_login_frag_forget_password);
+		tv_msg = (TextView) view.findViewById(R.id.tv_login_frag_msg);
+		bt_show = (Button) view.findViewById(R.id.bt_login_frag_show);
+		bt_login = (Button) view.findViewById(R.id.bt_login_frag_login);
+		bt_regist = (Button) view.findViewById(R.id.bt_login_frag_regist);
+	}
+
+	private void init() {
+		interactive = new Interactive(getActivity());
+		Bundle bundle = getArguments();
+		if (null != bundle) {
+			isLoginNot = bundle.getBoolean(IConstant.IK_BASE_LOGIN_NOT);
+		}
+	}
+
+	private void setListener() {
+		tv_forget.setOnClickListener(this);
+		bt_show.setOnClickListener(this);
+		bt_login.setOnClickListener(this);
+		bt_regist.setOnClickListener(this);
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.tv_login_frag_forget_password:
+
+			break;
+		case R.id.bt_login_frag_show:
+			showPassword();
+			break;
+		case R.id.bt_login_frag_login:
+			login();
+			break;
+		case R.id.bt_login_frag_regist:
+			regist();
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	/**
+	 * 显示密码
+	 */
+	private void showPassword() {
+		passwordType = et_password.getInputType();
+		if (InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD == passwordType) {
+			et_password.setInputType(InputType.TYPE_CLASS_TEXT
+					| InputType.TYPE_TEXT_VARIATION_PASSWORD);
+		} else {
+			et_password
+					.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+		}
+	}
+
+	/**
+	 * 登录
+	 */
+	private void login() {
+		if (!flag) {
+			// 注册跳转到登录界面
+			tv_title.setText("用户登录");
+			tv_msg.setVisibility(View.GONE);
+			tv_forget.setVisibility(View.GONE);
+			cleanEditText();
+			getActivity().findViewById(R.id.ll_login_frag_nickname)
+					.setVisibility(View.GONE);
+			flag = true;
+			return;
+		}
+		// TODO 验证
+		String username = et_username.getText().toString().trim();
+		String password = et_password.getText().toString().trim();
+
+		if (TextUtils.isEmpty(username)) {
+			Toast.makeText(getActivity(), "用户名不能为空", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (!CommonUtil.isValidMobiNumber(username)) {
+			Toast.makeText(getActivity(), "请输入一个有效的手机号", Toast.LENGTH_LONG)
+					.show();
+			return;
+		}
+		if (TextUtils.isEmpty(password)) {
+			Toast.makeText(getActivity(), "密码不能为空", Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		tv_msg.setText("正在登录...");
+		tv_msg.setVisibility(View.VISIBLE);
+
+		int requestUrl = R.string.url_login;
+		HashMap<String, String> map_login = new HashMap<String, String>();
+
+		map_login.put(IConstant.USERNAME, username);
+		map_login.put(IConstant.PASSWORD, password);
+
+		// map_login.put("mac", mac);
+		// map_login.put("imei", imei);
+		// map_login.put("model", model);
+		// map_login.put("version", version);
+
+		LoginParser parser = new LoginParser();
+		RequestVo requestVo = new RequestVo(requestUrl, getActivity(),
+				map_login, parser);
+		interactive.getDataFromServer(requestVo,
+				new Interactive.DataCallBack<Object>() {
+
+					@Override
+					public void progressData(Object param) {
+						// 隐藏提示信息
+						tv_msg.setVisibility(View.GONE);
+						// 处理服务器返回结果
+						if (param instanceof UserInfo) {
+							UserInfo user = (UserInfo) param;
+
+							// 将登录用户记入SharedPreferences
+							Map<String, String> map_sp = new HashMap<String, String>();
+							map_sp.put(IConstant.LOGIN_USER_NAME,
+									user.getUsername());
+							map_sp.put(IConstant.NICKNAME, user.getNickname());
+							CommonUtil.saveSharedPreferences(getActivity(),
+									"sp", map_sp);
+
+							// 判断是其他页面转来还是直接登陆
+							if (isLoginNot) {
+								getActivity().setResult(
+										IConstant.RESULTCODE_LOGIN_LOGIN);
+								getActivity().finish();
+							} else {
+								// TODO to 用户信息
+								Toast.makeText(getActivity(), "登录成功",
+										Toast.LENGTH_SHORT).show();
+								getActivity().finish();
+							}
+						} else if (param instanceof String) {
+							tv_msg.setText("用户名或密码错误");
+							tv_msg.setVisibility(View.VISIBLE);
+						}else if(param instanceof Boolean){
+							//新版用户接口
+							if((Boolean)param){
+								Toast.makeText(getActivity(), "登录成功",
+										Toast.LENGTH_SHORT).show();
+							}else{
+								Toast.makeText(getActivity(), "登录失败",
+										Toast.LENGTH_SHORT).show();
+							}
+							
+						} else {
+							Toast.makeText(getActivity(), "服务器异常",
+									Toast.LENGTH_SHORT).show();
+						}
+					}
+				});
+	}
+
+	/**
+	 * 注册
+	 */
+	private void regist() {
+
+		if (flag) {
+			// 切换到注册页面
+			tv_title.setText("用户注册");
+			tv_msg.setVisibility(View.GONE);
+			tv_forget.setVisibility(View.GONE);
+			cleanEditText();
+			getActivity().findViewById(R.id.ll_login_frag_nickname)
+					.setVisibility(View.VISIBLE);
+
+			/* android中获取焦点事件：先设置可焦点，再请求焦点 */
+			et_nickname.setFocusable(true);
+			et_nickname.requestFocus();
+
+			flag = false;
+			return;
+		}
+
+		String nickname = et_nickname.getText().toString().trim();
+		String username = et_username.getText().toString().trim();
+		String password = et_password.getText().toString().trim();
+
+		if (TextUtils.isEmpty(nickname)) {
+			Toast.makeText(getActivity(), "昵称不能为空", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (TextUtils.isEmpty(username)) {
+			Toast.makeText(getActivity(), "用户名不能为空", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (!CommonUtil.isValidMobiNumber(username)) {
+			Toast.makeText(getActivity(), "请输入一个有效的手机号", Toast.LENGTH_LONG)
+					.show();
+			return;
+		}
+		if (TextUtils.isEmpty(password)) {
+			Toast.makeText(getActivity(), "密码不能为空", Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		// 变更提示信息
+		tv_msg.setText("正在提交数据");
+		tv_msg.setVisibility(View.VISIBLE);
+
+		int url_regist = R.string.url_regist;
+		HashMap<String, String> map_regist = new HashMap<String, String>();
+		map_regist.put(IConstant.NICKNAME, nickname);
+		map_regist.put(IConstant.USERNAME, username);
+		map_regist.put(IConstant.PASSWORD, password);
+		// map_regist.put("mac", mac);
+		// map_regist.put("imei", imei);
+		// map_regist.put("model", model);
+		// map_regist.put("version", version);
+		RegisterParser registParser = new RegisterParser();
+		RequestVo registReq = new RequestVo(url_regist, getActivity(),
+				map_regist, registParser);
+		interactive.getDataFromServer(registReq,
+				new Interactive.DataCallBack<Object>() {
+
+					@Override
+					public void progressData(Object param) {
+						// 隐藏提示信息
+						tv_msg.setVisibility(View.GONE);
+
+						if (param instanceof String) {
+
+							// 用户名已存在 or 注册异常
+							if (IConstant.REGISTER_EXIST.equals(param)) {
+								tv_msg.setText("用户已存在");
+								tv_msg.setVisibility(View.VISIBLE);
+							} else {
+								tv_msg.setText((String) param);
+								tv_msg.setVisibility(View.VISIBLE);
+							}
+
+						} else if (param instanceof UserInfo) {
+							UserInfo user = (UserInfo) param;
+
+							// 将登录用户记入SharedPreferences
+							Map<String, String> map_sp = new HashMap<String, String>();
+							map_sp.put(IConstant.LOGIN_USER_NAME,
+									user.getUsername());
+							map_sp.put(IConstant.NICKNAME, user.getNickname());
+							CommonUtil.saveSharedPreferences(getActivity(),
+									"sp", map_sp);
+
+							// 注册成功时返回UserInfo对象
+							AlertDialog.Builder builder = new AlertDialog.Builder(
+									getActivity());
+							builder.setTitle("提示");
+							builder.setMessage("注册成功");
+							builder.setPositiveButton("确定",
+									new DialogInterface.OnClickListener() {
+
+										@Override
+										public void onClick(
+												DialogInterface dialog,
+												int which) {
+
+											if (isLoginNot) {
+												getActivity()
+														.setResult(
+																IConstant.RESULTCODE_LOGIN_LOGIN);
+												getActivity().finish();
+											} else {
+												// // TODO to 用户信息
+												// Toast.makeText(getActivity(),
+												// "跳转到用户界面",
+												// Toast.LENGTH_SHORT).show();
+												getActivity().finish();
+											}
+
+										}
+									});
+							builder.show();
+						}
+					}
+				});
+	}
+
+	/**
+	 * 清空编辑栏信息<br>
+	 * 昵称，用户名，密码
+	 */
+	private void cleanEditText() {
+		et_username.getText().clear();
+		et_password.getText().clear();
+		et_nickname.getText().clear();
+
+	}
+
+}

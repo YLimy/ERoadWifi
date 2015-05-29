@@ -1,0 +1,305 @@
+package com.e_road.ui;
+
+import java.io.File;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog.Builder;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.text.TextUtils;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import cn.jpush.android.api.JPushInterface;
+
+import com.e_road.R;
+import com.e_road.application.ERoadApplication;
+import com.e_road.download.DownLoadTask;
+import com.e_road.download.DownLoadTask.DownlaodListener;
+import com.e_road.thread.ThreadPoolManager;
+import com.e_road.utils.IConstant;
+import com.e_road.utils.LoggerUtil;
+import com.e_road.utils.NetUtil;
+import com.e_road.utils.parser.VersionParser;
+import com.e_road.vo.RequestVo;
+import com.e_road.vo.Version;
+
+/**
+ * 欢迎界面<br>
+ * 进行版本检查<br>
+ * 出现异常或网络异常时直接进入主界面
+ * 
+ * @author CaiMeng
+ * 
+ */
+public class WelcomeActivity extends Activity implements Runnable,
+		DownlaodListener {
+	private static final String TAG = "WelcomeActivity";
+
+	/** 当前版本号 */
+	private String clientVersion;
+	/** 服务器端版本号 */
+	private String serverVersion;
+	/** 从服务器端返回的版本信息 */
+	private Version version;
+	/** MSG:显示提示框 */
+	private static final int SHOW_DIALOG = 1;
+	/** MSG:下载失败 */
+	private static final int DOWN_ERRO = 2;
+	/** 下载进度条 */
+	private ProgressDialog mProgressDialog;
+	/** 下载APK文件 */
+	private File file;
+	/** 下载线程 */
+	private DownLoadTask mDownLoadTask;
+	/** 是否设置下载最大值 */
+	private boolean down_flag = true;
+	/** 进度条的值 */
+	private int progressValue = 0;
+
+	@SuppressLint("HandlerLeak")
+	private Handler handler = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+
+			case DOWN_ERRO:
+				mProgressDialog.dismiss();
+				Toast.makeText(WelcomeActivity.this,
+						R.string.welcome_download_erro, Toast.LENGTH_SHORT)
+						.show();
+				gotoNextPage();
+				break;
+
+			case SHOW_DIALOG:
+				// 显示提示框
+				showAlertDialoog();
+				break;
+
+			default:
+				break;
+			}
+		}
+
+	};
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.welcome_activity);
+		// 设置竖屏
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		// 获取当前版本号
+		try {
+			clientVersion = findClientVersion();
+		} catch (NameNotFoundException e) {
+			LoggerUtil.e("WelcomeActivity", e);
+		}
+		// 显示当前版本号
+		((TextView) findViewById(R.id.tv_welcome_version))
+				.setText(clientVersion);
+		// 检查版本更新
+		ThreadPoolManager.getInstatnce().addTask(this);
+	}
+
+	/**
+	 * 获取当前客户端版本号
+	 * 
+	 * @return
+	 * @throws NameNotFoundException
+	 */
+	private String findClientVersion() throws NameNotFoundException {
+		PackageManager pm = getPackageManager();
+		PackageInfo pi = pm.getPackageInfo(getPackageName(), 0);
+		return pi.versionName;
+	}
+	
+	/**
+	 * 提示更新对话框
+	 */
+	private void showAlertDialoog(){
+		Builder builder = new Builder(this);
+		builder.setTitle(R.string.welcome_alert_dialog_title);
+		builder.setMessage(R.string.welcome_alert_dialog_msg);
+		builder.setPositiveButton(R.string.ok, new OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// 下载APK
+				downloadApk();
+			}
+		});
+		builder.setNegativeButton(R.string.cancle,
+				new OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog,
+							int which) {
+						// 进入主页
+						gotoNextPage();
+					}
+				});
+		builder.create().show();
+	}
+
+	@Override
+	public void run() {
+		try {
+			if (NetUtil.hasNetwork(this)) {
+				RequestVo requestVo = new RequestVo(R.string.url_version, this,
+						null, new VersionParser());
+				/*
+				 * 如果服务器返回信息不能转换成Version， 说明访问网络或解析数据有异常 直接跳转到主界面
+				 */
+				version = (Version) NetUtil.get(requestVo);
+				serverVersion = version.getVersion();
+				if (clientVersion.equals(serverVersion)) {
+					gotoNextPage();
+				} else {
+					/*
+					 * 服务器版本与客户端版本不一致 发送消息SHOW_DIALOG
+					 */
+					Message.obtain(handler, SHOW_DIALOG).sendToTarget();
+				}
+			} else {
+				/*
+				 * 网络不可用时 直接跳转到主页
+				 */
+				gotoNextPage();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			/*
+			 * 查询客户端版本号出现异常,网络异常等 直接跳转到主页
+			 */
+			gotoNextPage();
+		}
+	}
+
+	/**
+	 * 跳转到首页
+	 */
+	private void gotoNextPage() {
+		Intent intent = new Intent(this, WifiFragmentActivity.class);
+//		Intent intent = new Intent(this, MainFragmentActivity.class);
+		intent.putExtra(IConstant.CONTENT_SHOW, "wifi");
+		intent.putExtra("isJump", true);// 是否进行WiFi向首页的跳转
+		startActivity(intent);
+		finish();
+	}
+
+	/**
+	 * 下载新版本
+	 */
+	private void downloadApk() {
+		initProgressDialog();
+		file = new File(ERoadApplication.getCachPath(), "e-way.apk");
+		String down_url = version.getUrl();
+		if (TextUtils.isEmpty(down_url)) {
+			Toast.makeText(this, "下载地址错误", Toast.LENGTH_LONG).show();
+			return;
+		}
+		LoggerUtil.d(TAG, "下载地址为：" + down_url);
+		mDownLoadTask = new DownLoadTask(down_url + "/e-way.apk",
+				file.getAbsolutePath(), 5);
+		mDownLoadTask.setListener(this);
+		ThreadPoolManager.getInstatnce().addTask(mDownLoadTask);
+	}
+
+	/**
+	 * 安装APK
+	 */
+	private void installApk() {
+		Intent install_intent = new Intent(Intent.ACTION_VIEW);
+		install_intent.setDataAndType(Uri.fromFile(file),
+				"application/vnd.android.package-archive");
+		startActivity(install_intent);
+		finish();
+	}
+
+	/**
+	 * 初始化下载进度条
+	 */
+	private void initProgressDialog() {
+		mProgressDialog = new ProgressDialog(this);
+		// 按回退键不取消下载
+		mProgressDialog.setCancelable(false);
+		// 横向进度条
+		mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		mProgressDialog.setMessage(getResources().getString(
+				R.string.welcome_progress_dialog_msg));
+		mProgressDialog.show();
+	}
+
+	@Override
+	public void update(int total, int len, int threadid) {
+		// 更新下载状态
+		if (down_flag) {
+			mProgressDialog.setMax(total);
+			down_flag = false;
+		}
+		progressValue += len;
+		mProgressDialog.setProgress(progressValue);
+	}
+
+	@Override
+	public void downLoadFinish(int totalSucess) {
+		// 下载完成
+		mProgressDialog.dismiss();
+		if (totalSucess == 5) {
+			installApk();
+		} else {
+			Message.obtain(handler, DOWN_ERRO).sendToTarget();
+		}
+	}
+
+	@Override
+	public void downLoadError(int type) {
+		// mProgressDialog.dismiss();
+		// Toast.makeText(this, "下载失败，错误代码："+type, Toast.LENGTH_SHORT).show();
+		handler.sendEmptyMessage(DOWN_ERRO);
+	}
+
+	@Override
+	protected void onPause() {
+		JPushInterface.onPause(this);
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		JPushInterface.onResume(this);
+		super.onResume();
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+
+		if (mDownLoadTask != null) {
+			mDownLoadTask.cancel();
+		}
+		mDownLoadTask = null;
+
+		if (mProgressDialog != null) {
+			mProgressDialog.dismiss();
+		}
+		mProgressDialog = null;
+
+		file = null;
+
+		// System.gc();
+	}
+}

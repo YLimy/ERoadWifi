@@ -1,0 +1,149 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".modifyActivity" >
+
+    <TextView
+        android:id="@+id/tv_modify_frag_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/title_bar_bg_gray"
+        android:gravity="center"
+        android:text="@string/account_modify_title"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+    
+    <LinearLayout
+        android:id="@+id/ll_modify_frag_nickname"
+        style="@style/accountInputBorder"
+        android:layout_below="@id/tv_modify_frag_title"
+        android:layout_marginTop="18dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/account_nickname"
+            android:textColor="@color/grey" />
+		<!-- 昵称输入框 -->
+        <EditText
+            android:id="@+id/et_modify_frag_nickname"
+            style="@style/accountEditText" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_modify_frag_user"
+        style="@style/accountInputBorder"
+        android:layout_below="@id/ll_modify_frag_nickname"
+        android:layout_marginTop="18dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/account_username"
+            android:textColor="@color/grey" />
+		<!-- 用户名输入框 -->
+        <EditText
+            android:id="@+id/et_modify_frag_username"
+            android:enabled="false"
+            style="@style/accountEditText" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_modify_frag_password"
+        style="@style/accountInputBorder"
+        android:layout_below="@id/ll_modify_frag_user"
+        android:layout_marginTop="15dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/account_password"
+            android:textColor="@color/grey" />
+		<!-- 密码输入框 -->
+        <EditText
+            android:id="@+id/et_modify_frag_password"
+            style="@style/accountEditText"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:hint="@string/account_password_hint"
+            android:inputType="textPassword" />
+
+        <Button
+            android:id="@+id/bt_modify_frag_pwd_show"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/btn_show"
+            android:text="@string/account_modify"
+            android:textColor="@color/grey"
+            android:textSize="14sp" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/ll_modify_frag_password_repeat"
+        style="@style/accountInputBorder"
+        android:layout_below="@id/ll_modify_frag_password"
+        android:layout_marginTop="15dp"
+        android:visibility="gone" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/account_password"
+            android:textColor="@color/grey" />
+		<!-- 重复密码输入框 -->
+        <EditText
+            android:id="@+id/et_modify_frag_password_repeat"
+            style="@style/accountEditText"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:hint="@string/account_password_hint_repeat"
+            android:inputType="textPassword" />
+
+        <Button
+            android:id="@+id/bt_modify_frag_pwdr_show"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/btn_show"
+            android:text="@string/account_password_show"
+            android:textColor="@color/grey"
+            android:textSize="14sp" />
+    </LinearLayout>
+    
+    <TextView 
+        android:id="@+id/tv_modify_frag_msg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/ll_modify_frag_password_repeat"
+        android:visibility="invisible"
+        android:textSize="12sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_modify_frag_msg"
+        android:layout_marginLeft="18dp"
+        android:layout_marginRight="18dp"
+        android:layout_marginTop="13dp" >
+
+        <!-- 确认修改 -->
+        <Button
+            android:id="@+id/bt_modify_frag_confirm"
+            style="@style/accountButtonStyle"
+            android:layout_marginLeft="4dp"
+            android:background="@drawable/btn_quick_register"
+            android:text="@string/account_modify_confirm" />
+        <!-- 去登录 -->
+        <Button
+            android:id="@+id/bt_modify_frag_goto_login"
+            style="@style/accountButtonStyle"
+            android:layout_marginLeft="4dp"
+            android:visibility="gone"
+            android:background="@drawable/btn_add_accounts"
+            android:text="@string/account_modify_goto_login" />
+    </LinearLayout>
+
+</RelativeLayout>

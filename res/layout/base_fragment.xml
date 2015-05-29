@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <LinearLayout 
+        android:id="@+id/ll_base_frag_ads"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView 
+        android:id="@+id/tv_base_frag"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:textSize="12sp"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:visibility="gone"
+        android:singleLine="true" />
+    </LinearLayout>
+    
+    
+    <LinearLayout 
+        android:id="@+id/ll_base_frag_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"></LinearLayout>
+</LinearLayout>
